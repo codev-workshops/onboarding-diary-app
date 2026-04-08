@@ -1,6 +1,6 @@
 export type Role = "recruit" | "manager" | "admin";
 
-export interface User {
+export type User = {
   id: string;
   email: string;
   fullName: string;
@@ -13,24 +13,24 @@ export interface User {
   updatedAt: string;
 }
 
-export interface AuthResponse {
+export type AuthResponse = {
   user: User;
   accessToken: string;
   refreshToken: string;
-}
+};
 
-export interface ApiErrorResponse {
+export type ApiErrorResponse = {
   error: {
     code: string;
     message: string;
     details?: Array<{ field: string; message: string }>;
   };
-}
+};
 
-export interface PaginatedResponse<T> {
+export type PaginatedResponse<T> = {
   items: T[];
   total: number;
   page: number;
   perPage: number;
   totalPages: number;
-}
+};

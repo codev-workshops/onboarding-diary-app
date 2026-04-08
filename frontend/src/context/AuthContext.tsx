@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, type ReactNode } from "react";
-import { User } from "../types";
+import type { User } from "../types";
 import * as authService from "../services/auth.service";
 import { AuthContext } from "./authContextDef";
 

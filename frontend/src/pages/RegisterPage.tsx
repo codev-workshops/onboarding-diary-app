@@ -3,8 +3,8 @@ import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
-import { AxiosError } from "axios";
-import { ApiErrorResponse } from "../types";
+import type { AxiosError } from "axios";
+import type { ApiErrorResponse } from "../types";
 
 export default function RegisterPage() {
   const { user, register } = useAuth();

@@ -3,8 +3,8 @@ import { useAuth } from "../hooks/useAuth";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import * as authService from "../services/auth.service";
-import { AxiosError } from "axios";
-import { ApiErrorResponse } from "../types";
+import type { AxiosError } from "axios";
+import type { ApiErrorResponse } from "../types";
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
