@@ -158,6 +158,100 @@ export type UpdateNoteInput = {
   tags?: string[];
 };
 
+// Report types
+export type ReportCategory = "tasks" | "issues" | "feedback" | "combined";
+export type ReportFormat = "pdf" | "csv";
+
+// Manager types
+export type RecruitStats = {
+  id: string;
+  fullName: string;
+  email: string;
+  department: string | null;
+  startDate: string | null;
+  isActive: boolean;
+  createdAt: string;
+  totalTasks: number;
+  completedTasks: number;
+  taskCompletionRate: number;
+  openIssues: number;
+  totalEntries: number;
+};
+
+export type ManagerDashboardData = {
+  recruits: RecruitStats[];
+  aggregate: {
+    totalRecruits: number;
+    avgTaskCompletionRate: number;
+    totalOpenIssues: number;
+  };
+};
+
+export type RecruitListItem = {
+  id: string;
+  fullName: string;
+  email: string;
+  department: string | null;
+  startDate: string | null;
+  isActive: boolean;
+  createdAt: string;
+};
+
+// Admin types
+export type AdminUser = {
+  id: string;
+  email: string;
+  fullName: string;
+  role: Role;
+  department: string | null;
+  startDate: string | null;
+  managerId: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  manager: { id: string; fullName: string; email: string } | null;
+};
+
+export type CreateUserInput = {
+  email: string;
+  password: string;
+  fullName: string;
+  role: Role;
+  department?: string;
+  startDate?: string;
+};
+
+export type UpdateUserInput = {
+  fullName?: string;
+  role?: Role;
+  department?: string;
+  startDate?: string;
+};
+
+export type AdminDashboardData = {
+  users: {
+    total: number;
+    byRole: { recruit: number; manager: number; admin: number };
+    active: number;
+    inactive: number;
+  };
+  entries: {
+    totalTasks: number;
+    completedTasks: number;
+    taskCompletionRate: number;
+    totalIssues: number;
+    openIssues: number;
+    totalFeedback: number;
+    totalNotes: number;
+  };
+};
+
+export type ManagerOption = {
+  id: string;
+  fullName: string;
+  email: string;
+};
+
 // Dashboard types
 export type DashboardSummary = {
   totalTasks: number;
