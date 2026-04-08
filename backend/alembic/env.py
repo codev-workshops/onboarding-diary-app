@@ -14,6 +14,7 @@ from app.models import task  # noqa: F401
 from app.models import issue  # noqa: F401
 from app.models import feedback  # noqa: F401
 from app.models import note  # noqa: F401
+from app.models import report  # noqa: F401
 
 config = context.config
 

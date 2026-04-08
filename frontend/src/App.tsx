@@ -8,6 +8,7 @@ import TasksPage from "./pages/TasksPage";
 import IssuesPage from "./pages/IssuesPage";
 import FeedbackPage from "./pages/FeedbackPage";
 import NotesPage from "./pages/NotesPage";
+import ReportsPage from "./pages/ReportsPage";
 import type { ReactNode } from "react";
 
 const { Header, Content, Footer } = Layout;
@@ -19,6 +20,48 @@ const Placeholder = ({ name }: { name: string }) => (
     <p>This page is under construction.</p>
   </div>
 );
+
+function NavBar() {
+  const { isAuthenticated } = useAuth();
+  const location = window.location.pathname;
+
+  if (!isAuthenticated) return null;
+
+  const items = [
+    { key: "/dashboard", label: "Dashboard" },
+    { key: "/tasks", label: "Tasks" },
+    { key: "/issues", label: "Issues" },
+    { key: "/feedback", label: "Feedback" },
+    { key: "/notes", label: "Notes" },
+    { key: "/reports", label: "Reports" },
+  ];
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        gap: 16,
+        alignItems: "center",
+        marginLeft: 32,
+        flex: 1,
+      }}
+    >
+      {items.map((item) => (
+        <a
+          key={item.key}
+          href={item.key}
+          style={{
+            color: location === item.key ? "#1677ff" : "rgba(255,255,255,0.65)",
+            textDecoration: "none",
+            fontSize: 14,
+          }}
+        >
+          {item.label}
+        </a>
+      ))}
+    </div>
+  );
+}
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -119,7 +162,7 @@ function AppRoutes() {
         path="/reports"
         element={
           <ProtectedRoute>
-            <Placeholder name="Reports" />
+            <ReportsPage />
           </ProtectedRoute>
         }
       />
@@ -158,6 +201,7 @@ function App() {
               <Title level={3} style={{ color: "#fff", margin: 0 }}>
                 Onboarding Diary
               </Title>
+              <NavBar />
             </Header>
 
             <Content style={{ padding: "24px 48px", flex: 1 }}>
