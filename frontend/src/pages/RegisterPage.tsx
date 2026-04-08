@@ -125,6 +125,22 @@ export default function RegisterPage() {
             rules={[
               { required: true, message: "Please enter a password" },
               { min: 8, message: "Password must be at least 8 characters" },
+              {
+                pattern: /[A-Z]/,
+                message: "Password must contain at least one uppercase letter",
+              },
+              {
+                pattern: /[a-z]/,
+                message: "Password must contain at least one lowercase letter",
+              },
+              {
+                pattern: /\d/,
+                message: "Password must contain at least one digit",
+              },
+              {
+                pattern: /[!@#$%^&*(),.?":{}|<>_\-+=~`[\]\\/;']/,
+                message: "Password must contain at least one special character",
+              },
             ]}
             hasFeedback
           >

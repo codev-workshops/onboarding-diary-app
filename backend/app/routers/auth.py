@@ -7,7 +7,6 @@ from app.auth.utils import create_access_token, hash_password, verify_password
 from app.database import get_db
 from app.models.user import User
 from app.schemas.user import (
-    Token,
     TokenWithUser,
     UserLogin,
     UserRegister,
@@ -80,8 +79,12 @@ async def update_me(
     db: AsyncSession = Depends(get_db),
 ):
     update_data = payload.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(current_user, field, value)
+    if "full_name" in update_data:
+        current_user.full_name = update_data["full_name"]
+    if "department" in update_data:
+        current_user.department = update_data["department"]
+    if "start_date" in update_data:
+        current_user.start_date = update_data["start_date"]
     await db.flush()
     await db.refresh(current_user)
     return current_user
