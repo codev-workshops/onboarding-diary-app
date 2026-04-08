@@ -2,14 +2,25 @@ import jwt from "jsonwebtoken";
 import { env } from "../config";
 import { JwtPayload } from "../types";
 
-const ACCESS_EXPIRY_SECONDS = 900; // 15 minutes
-const REFRESH_EXPIRY_SECONDS = 604800; // 7 days
+function parseDuration(value: string): number {
+  const match = value.match(/^(\d+)([smhd])$/);
+  if (!match) return 900; // default 15 minutes
+  const num = parseInt(match[1], 10);
+  const unit = match[2];
+  switch (unit) {
+    case "s": return num;
+    case "m": return num * 60;
+    case "h": return num * 3600;
+    case "d": return num * 86400;
+    default: return 900;
+  }
+}
 
 export function generateAccessToken(payload: JwtPayload): string {
   return jwt.sign(
     { ...payload } as object,
     env.JWT_SECRET,
-    { expiresIn: ACCESS_EXPIRY_SECONDS }
+    { expiresIn: parseDuration(env.JWT_ACCESS_EXPIRY) }
   );
 }
 
@@ -17,7 +28,7 @@ export function generateRefreshToken(payload: JwtPayload): string {
   return jwt.sign(
     { ...payload } as object,
     env.JWT_REFRESH_SECRET,
-    { expiresIn: REFRESH_EXPIRY_SECONDS }
+    { expiresIn: parseDuration(env.JWT_REFRESH_EXPIRY) }
   );
 }
 

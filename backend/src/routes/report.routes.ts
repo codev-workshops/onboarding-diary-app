@@ -19,6 +19,11 @@ router.get(
         return;
       }
 
+      if (isNaN(Date.parse(dateFrom)) || isNaN(Date.parse(dateTo))) {
+        res.status(400).json({ error: { code: "VALIDATION_ERROR", message: "dateFrom and dateTo must be valid dates" } });
+        return;
+      }
+
       const validCategories = ["tasks", "issues", "feedback", "combined"];
       if (category && !validCategories.includes(category)) {
         res.status(400).json({ error: { code: "VALIDATION_ERROR", message: "category must be one of: tasks, issues, feedback, combined" } });

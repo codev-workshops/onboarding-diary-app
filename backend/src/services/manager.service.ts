@@ -24,9 +24,10 @@ export async function getManagerDashboard(managerId: string, callerRole: string)
 
   const recruitStats = await Promise.all(
     recruits.map(async (recruit) => {
-      const [totalTasks, completedTasks, openIssues, totalFeedback, totalNotes] = await Promise.all([
+      const [totalTasks, completedTasks, totalIssues, openIssues, totalFeedback, totalNotes] = await Promise.all([
         prisma.task.count({ where: { userId: recruit.id } }),
         prisma.task.count({ where: { userId: recruit.id, status: "completed" } }),
+        prisma.issue.count({ where: { userId: recruit.id } }),
         prisma.issue.count({ where: { userId: recruit.id, status: { in: ["open", "in_progress"] } } }),
         prisma.feedback.count({ where: { userId: recruit.id } }),
         prisma.note.count({ where: { userId: recruit.id } }),
@@ -40,7 +41,7 @@ export async function getManagerDashboard(managerId: string, callerRole: string)
         completedTasks,
         taskCompletionRate,
         openIssues,
-        totalEntries: totalTasks + (totalFeedback + totalNotes + openIssues),
+        totalEntries: totalTasks + totalIssues + totalFeedback + totalNotes,
       };
     })
   );

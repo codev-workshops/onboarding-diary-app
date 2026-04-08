@@ -27,9 +27,9 @@ export default function RegisterPage() {
     if (formData.fullName.trim().length < 2) newErrors.fullName = "Name must be at least 2 characters";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Invalid email address";
     if (formData.password.length < 8) newErrors.password = "Password must be at least 8 characters";
-    if (!/[A-Z]/.test(formData.password)) newErrors.password = "Must include an uppercase letter";
-    if (!/[a-z]/.test(formData.password)) newErrors.password = "Must include a lowercase letter";
-    if (!/[0-9]/.test(formData.password)) newErrors.password = "Must include a number";
+    else if (!/[A-Z]/.test(formData.password)) newErrors.password = "Must include an uppercase letter";
+    else if (!/[a-z]/.test(formData.password)) newErrors.password = "Must include a lowercase letter";
+    else if (!/[0-9]/.test(formData.password)) newErrors.password = "Must include a number";
     if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
