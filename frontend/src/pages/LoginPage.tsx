@@ -42,9 +42,9 @@ export default function LoginPage() {
           style={{ width: "100%", textAlign: "center", marginBottom: 24 }}
         >
           <Title level={2} style={{ margin: 0 }}>
-            Welcome Back
+            Welcome to Onboarding Diary
           </Title>
-          <Text type="secondary">Sign in to your Onboarding Diary</Text>
+          <Text type="secondary">Sign in to start your onboarding journey</Text>
         </Space>
 
         <Form name="login" layout="vertical" onFinish={onFinish} autoComplete="off" size="large">
