@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import uuid
 from datetime import date, datetime
 from enum import Enum
@@ -31,7 +29,7 @@ class IssueCreate(BaseModel):
     resolution_notes: Optional[str] = Field(default=None, max_length=5000)
 
     @model_validator(mode="after")
-    def validate_resolution_notes(self) -> IssueCreate:
+    def validate_resolution_notes(self) -> "IssueCreate":
         if self.status in (IssueStatus.resolved, IssueStatus.closed):
             if not self.resolution_notes:
                 raise ValueError(
