@@ -165,7 +165,7 @@ export default function TasksPage() {
         const input: UpdateTaskInput = {
           date: formDate,
           title: formTitle,
-          description: formDescription || undefined,
+          description: formDescription || null,
           category: formCategory,
           status: formStatus,
           priority: formPriority,

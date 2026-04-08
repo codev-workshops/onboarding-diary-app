@@ -61,7 +61,14 @@ export type CreateTaskInput = {
   priority?: TaskPriority;
 };
 
-export type UpdateTaskInput = Partial<CreateTaskInput>;
+export type UpdateTaskInput = {
+  date?: string;
+  title?: string;
+  description?: string | null;
+  category?: TaskCategory;
+  status?: TaskStatus;
+  priority?: TaskPriority;
+};
 
 export type IssueSeverity = "low" | "medium" | "high" | "critical";
 export type IssueStatus = "open" | "in_progress" | "resolved" | "closed";
@@ -88,4 +95,11 @@ export type CreateIssueInput = {
   resolutionNotes?: string;
 };
 
-export type UpdateIssueInput = Partial<CreateIssueInput>;
+export type UpdateIssueInput = {
+  date?: string;
+  title?: string;
+  description?: string;
+  severity?: IssueSeverity;
+  status?: IssueStatus;
+  resolutionNotes?: string | null;
+};

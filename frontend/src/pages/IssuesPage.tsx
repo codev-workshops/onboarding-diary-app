@@ -155,7 +155,7 @@ export default function IssuesPage() {
           description: formDescription,
           severity: formSeverity,
           status: formStatus,
-          resolutionNotes: formResolutionNotes || undefined,
+          resolutionNotes: formResolutionNotes || null,
         };
         await issueService.updateIssue(editingIssue.id, input);
       } else {
