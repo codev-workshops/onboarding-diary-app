@@ -37,25 +37,32 @@ async def global_search(
     Respects role-based access control.
     """
     accessible_ids = await get_accessible_user_ids(current_user, db)
-    pattern = f"%{q}%"
+    escaped_q = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    pattern = f"%{escaped_q}%"
 
     items: list[SearchResultItem] = []
     total = 0
 
     search_types = ["tasks", "issues", "feedback", "notes"] if entry_type == "all" else [entry_type]
 
-    for stype in search_types:
-        results = await _search_entity(stype, pattern, accessible_ids, page, per_page, db)
-        items.extend(results)
+    if entry_type == "all":
+        # For combined search, fetch enough items from each entity to fill
+        # the requested page, then paginate the merged+sorted results.
+        fetch_limit = page * per_page
+        for stype in search_types:
+            results = await _search_entity(stype, pattern, accessible_ids, 1, fetch_limit, db)
+            items.extend(results)
 
-    # Sort all results by date descending, then created_at descending
-    items.sort(key=lambda x: (x.date, x.created_at), reverse=True)
+        items.sort(key=lambda x: (x.date, x.created_at), reverse=True)
+        start = (page - 1) * per_page
+        paginated_items = items[start : start + per_page]
+    else:
+        # Single-type search: SQL-level pagination is correct.
+        results = await _search_entity(entry_type, pattern, accessible_ids, page, per_page, db)
+        items.extend(results)
+        paginated_items = items
 
     total = await _count_all(search_types, pattern, accessible_ids, db)
-
-    # Apply pagination across combined results
-    start = (page - 1) * per_page
-    paginated_items = items[start : start + per_page] if entry_type == "all" else items
 
     return SearchResponse(
         query=q,
