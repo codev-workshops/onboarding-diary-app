@@ -12,26 +12,26 @@ interface TaskListParams {
 
 export const taskApi = {
   create: async (data: TaskCreate): Promise<Task> => {
-    const response = await apiClient.post<Task>('/api/v1/tasks/', data);
+    const response = await apiClient.post<Task>('/tasks/', data);
     return response.data;
   },
 
   list: async (params?: TaskListParams): Promise<PaginatedTaskResponse> => {
-    const response = await apiClient.get<PaginatedTaskResponse>('/api/v1/tasks/', { params });
+    const response = await apiClient.get<PaginatedTaskResponse>('/tasks/', { params });
     return response.data;
   },
 
   get: async (id: string): Promise<Task> => {
-    const response = await apiClient.get<Task>(`/api/v1/tasks/${id}`);
+    const response = await apiClient.get<Task>(`/tasks/${id}`);
     return response.data;
   },
 
   update: async (id: string, data: TaskUpdate): Promise<Task> => {
-    const response = await apiClient.put<Task>(`/api/v1/tasks/${id}`, data);
+    const response = await apiClient.put<Task>(`/tasks/${id}`, data);
     return response.data;
   },
 
   delete: async (id: string): Promise<void> => {
-    await apiClient.delete(`/api/v1/tasks/${id}`);
+    await apiClient.delete(`/tasks/${id}`);
   },
 };
