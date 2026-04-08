@@ -12,7 +12,7 @@ router.get(
   "/manager",
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      const analytics = await analyticsService.getManagerAnalytics(req.user!.userId);
+      const analytics = await analyticsService.getManagerAnalytics(req.user!.userId, req.user!.role);
       res.json(analytics);
     } catch (err) {
       next(err);

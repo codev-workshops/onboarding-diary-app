@@ -1,9 +1,13 @@
 import { prisma } from "../config";
 import { ForbiddenError, NotFoundError } from "../utils";
 
-export async function getManagerAnalytics(managerId: string) {
+export async function getManagerAnalytics(managerId: string, callerRole: string) {
+  const where = callerRole === "admin"
+    ? { role: "recruit" as const }
+    : { managerId, role: "recruit" as const };
+
   const recruits = await prisma.user.findMany({
-    where: { managerId, role: "recruit" },
+    where,
     select: { id: true },
   });
 

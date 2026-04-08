@@ -72,7 +72,7 @@ router.post(
       value: body.password,
       rules: [
         { check: isRequired, message: "Password is required" },
-        { check: isValidPassword, message: "Password must be at least 8 characters with uppercase, lowercase, number, and special character" },
+        { check: isValidPassword, message: "Password must be at least 8 characters with uppercase, lowercase, and a number" },
       ],
     },
     {
