@@ -146,8 +146,8 @@ function AnalyticsPage() {
                     />
                     <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                     <Tooltip
-                      labelFormatter={(label: string) => dayjs(label).format("MMM D, YYYY")}
-                      formatter={(value: number) => [value, "Tasks Completed"]}
+                      labelFormatter={(label) => dayjs(String(label)).format("MMM D, YYYY")}
+                      formatter={(value) => [value, "Tasks Completed"]}
                     />
                     <Line
                       type="monotone"
@@ -205,9 +205,9 @@ function AnalyticsPage() {
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(value: number, name: string) => [
+                      formatter={(value, name) => [
                         value,
-                        name.charAt(0).toUpperCase() + name.slice(1),
+                        String(name).charAt(0).toUpperCase() + String(name).slice(1),
                       ]}
                     />
                     <Legend />
@@ -242,9 +242,9 @@ function AnalyticsPage() {
                     />
                     <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                     <Tooltip
-                      formatter={(value: number) => [value, "Count"]}
-                      labelFormatter={(label: string) =>
-                        label.charAt(0).toUpperCase() + label.slice(1)
+                      formatter={(value) => [value, "Count"]}
+                      labelFormatter={(label) =>
+                        String(label).charAt(0).toUpperCase() + String(label).slice(1)
                       }
                     />
                     <Bar dataKey="count" radius={[4, 4, 0, 0]}>
@@ -293,8 +293,8 @@ function AnalyticsPage() {
                     />
                     <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                     <Tooltip
-                      labelFormatter={(label: string) => dayjs(label).format("MMM D, YYYY")}
-                      formatter={(value: number) => [value, "Entries"]}
+                      labelFormatter={(label) => dayjs(String(label)).format("MMM D, YYYY")}
+                      formatter={(value) => [value, "Entries"]}
                     />
                     <Area
                       type="monotone"
