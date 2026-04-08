@@ -1,20 +1,12 @@
-import { useState, useCallback, useSyncExternalStore, type ReactNode } from "react";
+import { useState, useEffect, useCallback, useRef, type ReactNode } from "react";
 import { authApi } from "../api/auth";
 import type { User, LoginRequest, RegisterRequest } from "../types/auth";
 import { AuthContext } from "./AuthContext";
 
-function useInitialAuth() {
-  const hasToken = useSyncExternalStore(
-    () => () => {},
-    () => !!localStorage.getItem("access_token"),
-  );
-  return hasToken;
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const hasToken = useInitialAuth();
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(hasToken);
+  const [isLoading, setIsLoading] = useState(() => !!localStorage.getItem("access_token"));
+  const didInit = useRef(false);
 
   const refreshUser = useCallback(async () => {
     try {
@@ -30,12 +22,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Initialize user on mount if token exists
-  useState(() => {
-    if (hasToken) {
+  // Initialize user on mount if token exists (runs once, safe in StrictMode)
+  useEffect(() => {
+    if (didInit.current) return;
+    didInit.current = true;
+    const token = localStorage.getItem("access_token");
+    if (token) {
       refreshUser();
+    } else {
+      setIsLoading(false);
     }
-  });
+  }, [refreshUser]);
 
   const login = async (data: LoginRequest) => {
     const response = await authApi.login(data);

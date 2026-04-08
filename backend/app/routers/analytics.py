@@ -1,8 +1,9 @@
 """Analytics endpoints — charts data for task completion, issues, feedback, activity."""
 
 import datetime as _dt
+import uuid
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import Date, case, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -50,6 +51,12 @@ async def get_analytics(
     start = start_date or default_start
     end = end_date or default_end
 
+    if start > end:
+        raise HTTPException(
+            status_code=400,
+            detail="start_date must be on or before end_date",
+        )
+
     task_completion = await _task_completion_over_time(db, accessible_ids, start, end)
     issues_severity = await _issues_by_severity(db, accessible_ids, start, end)
     feedback_dist = await _feedback_distribution(db, accessible_ids, start, end)
@@ -65,7 +72,7 @@ async def get_analytics(
 
 async def _task_completion_over_time(
     db: AsyncSession,
-    accessible_ids: list | None,
+    accessible_ids: list[uuid.UUID] | None,
     start: _dt.date,
     end: _dt.date,
 ) -> TaskCompletionOverTime:
@@ -89,14 +96,14 @@ async def _task_completion_over_time(
     data = [DateCount(date=row.day, count=row.completed) for row in rows]
 
     # Fill gaps with zero counts
-    data = _fill_date_gaps(data, start, end)
+    data = _fill_date_gaps(data, start, end, DateCount)
 
     return TaskCompletionOverTime(data=data)
 
 
 async def _issues_by_severity(
     db: AsyncSession,
-    accessible_ids: list | None,
+    accessible_ids: list[uuid.UUID] | None,
     start: _dt.date,
     end: _dt.date,
 ) -> IssuesBySeverity:
@@ -119,7 +126,7 @@ async def _issues_by_severity(
 
 async def _feedback_distribution(
     db: AsyncSession,
-    accessible_ids: list | None,
+    accessible_ids: list[uuid.UUID] | None,
     start: _dt.date,
     end: _dt.date,
 ) -> FeedbackDistribution:
@@ -142,7 +149,7 @@ async def _feedback_distribution(
 
 async def _activity_timeline(
     db: AsyncSession,
-    accessible_ids: list | None,
+    accessible_ids: list[uuid.UUID] | None,
     start: _dt.date,
     end: _dt.date,
 ) -> ActivityTimeline:
@@ -178,30 +185,20 @@ async def _activity_timeline(
     rows = result.all()
 
     data = [ActivityDay(date=row.day, count=row.cnt) for row in rows]
-    data = _fill_date_gaps_activity(data, start, end)
+    data = _fill_date_gaps(data, start, end, ActivityDay)
 
     return ActivityTimeline(data=data)
 
 
-def _fill_date_gaps(data: list[DateCount], start: _dt.date, end: _dt.date) -> list[DateCount]:
+T = DateCount | ActivityDay
+
+
+def _fill_date_gaps(data: list[T], start: _dt.date, end: _dt.date, model_cls: type[T]) -> list[T]:
     """Fill in missing dates with zero counts."""
     date_map = {d.date: d.count for d in data}
-    filled: list[DateCount] = []
+    filled: list[T] = []
     current = start
     while current <= end:
-        filled.append(DateCount(date=current, count=date_map.get(current, 0)))
-        current += _dt.timedelta(days=1)
-    return filled
-
-
-def _fill_date_gaps_activity(
-    data: list[ActivityDay], start: _dt.date, end: _dt.date
-) -> list[ActivityDay]:
-    """Fill in missing dates with zero counts for activity timeline."""
-    date_map = {d.date: d.count for d in data}
-    filled: list[ActivityDay] = []
-    current = start
-    while current <= end:
-        filled.append(ActivityDay(date=current, count=date_map.get(current, 0)))
+        filled.append(model_cls(date=current, count=date_map.get(current, 0)))
         current += _dt.timedelta(days=1)
     return filled

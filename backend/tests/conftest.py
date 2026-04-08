@@ -4,6 +4,7 @@ Uses the Docker PostgreSQL with a separate test database.
 Each test gets isolated sessions to avoid asyncpg concurrent operation errors.
 """
 
+import os
 import uuid
 
 import pytest
@@ -17,7 +18,8 @@ from app.database import Base, get_db
 from app.main import app
 from app.models.user import User
 
-TEST_DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/test_onboarding_diary"
+_DB_HOST = os.getenv("DB_HOST", "localhost")
+TEST_DATABASE_URL = f"postgresql+asyncpg://postgres:postgres@{_DB_HOST}:5432/test_onboarding_diary"
 
 _engine = None
 _session_factory = None
@@ -28,7 +30,7 @@ async def _get_engine():
     global _engine
     if _engine is None:
         admin_engine = create_async_engine(
-            "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres",
+            f"postgresql+asyncpg://postgres:postgres@{_DB_HOST}:5432/postgres",
             isolation_level="AUTOCOMMIT",
         )
         async with admin_engine.connect() as conn:
