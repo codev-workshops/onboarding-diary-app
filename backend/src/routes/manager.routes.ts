@@ -12,7 +12,7 @@ router.get(
   "/dashboard",
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      const dashboard = await managerService.getManagerDashboard(req.user!.userId);
+      const dashboard = await managerService.getManagerDashboard(req.user!.userId, req.user!.role);
       res.json(dashboard);
     } catch (err) {
       next(err);
@@ -24,7 +24,7 @@ router.get(
   "/recruits",
   async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
-      const recruits = await managerService.getRecruitList(req.user!.userId);
+      const recruits = await managerService.getRecruitList(req.user!.userId, req.user!.role);
       res.json(recruits);
     } catch (err) {
       next(err);
@@ -38,6 +38,7 @@ router.get(
     try {
       const result = await managerService.getRecruitTasks(
         req.user!.userId,
+        req.user!.role,
         req.params.recruitId as string,
         req.query as Record<string, string>
       );
@@ -54,6 +55,7 @@ router.get(
     try {
       const result = await managerService.getRecruitIssues(
         req.user!.userId,
+        req.user!.role,
         req.params.recruitId as string,
         req.query as Record<string, string>
       );
@@ -70,6 +72,7 @@ router.get(
     try {
       const result = await managerService.getRecruitFeedback(
         req.user!.userId,
+        req.user!.role,
         req.params.recruitId as string,
         req.query as Record<string, string>
       );
@@ -86,6 +89,7 @@ router.get(
     try {
       const result = await managerService.getRecruitNotes(
         req.user!.userId,
+        req.user!.role,
         req.params.recruitId as string,
         req.query as Record<string, string>
       );

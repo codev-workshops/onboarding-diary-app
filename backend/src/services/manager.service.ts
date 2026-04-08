@@ -12,9 +12,13 @@ const recruitSelectFields = {
   createdAt: true,
 };
 
-export async function getManagerDashboard(managerId: string) {
+export async function getManagerDashboard(managerId: string, callerRole: string) {
+  const where = callerRole === "admin"
+    ? { role: "recruit" as const }
+    : { managerId, role: "recruit" as const };
+
   const recruits = await prisma.user.findMany({
-    where: { managerId, role: "recruit" },
+    where,
     select: recruitSelectFields,
   });
 
@@ -57,16 +61,20 @@ export async function getManagerDashboard(managerId: string) {
   };
 }
 
-export async function getRecruitList(managerId: string) {
+export async function getRecruitList(managerId: string, callerRole: string) {
+  const where = callerRole === "admin"
+    ? { role: "recruit" as const }
+    : { managerId, role: "recruit" as const };
+
   const recruits = await prisma.user.findMany({
-    where: { managerId, role: "recruit" },
+    where,
     select: recruitSelectFields,
   });
 
   return recruits;
 }
 
-async function verifyRecruitAccess(managerId: string, recruitId: string) {
+async function verifyRecruitAccess(managerId: string, callerRole: string, recruitId: string) {
   const recruit = await prisma.user.findUnique({
     where: { id: recruitId },
     select: { id: true, managerId: true, role: true },
@@ -76,15 +84,19 @@ async function verifyRecruitAccess(managerId: string, recruitId: string) {
     throw new NotFoundError("Recruit");
   }
 
-  if (recruit.role !== "recruit" || recruit.managerId !== managerId) {
+  if (recruit.role !== "recruit") {
+    throw new ForbiddenError("You can only view entries of recruits");
+  }
+
+  if (callerRole !== "admin" && recruit.managerId !== managerId) {
     throw new ForbiddenError("You can only view entries of your assigned recruits");
   }
 
   return recruit;
 }
 
-export async function getRecruitTasks(managerId: string, recruitId: string, query: Record<string, string>) {
-  await verifyRecruitAccess(managerId, recruitId);
+export async function getRecruitTasks(managerId: string, callerRole: string, recruitId: string, query: Record<string, string>) {
+  await verifyRecruitAccess(managerId, callerRole, recruitId);
 
   const { page, perPage, skip } = parsePagination(query);
   const where: Prisma.TaskWhereInput = { userId: recruitId };
@@ -112,8 +124,8 @@ export async function getRecruitTasks(managerId: string, recruitId: string, quer
   return buildPaginatedResponse(items, total, page, perPage);
 }
 
-export async function getRecruitIssues(managerId: string, recruitId: string, query: Record<string, string>) {
-  await verifyRecruitAccess(managerId, recruitId);
+export async function getRecruitIssues(managerId: string, callerRole: string, recruitId: string, query: Record<string, string>) {
+  await verifyRecruitAccess(managerId, callerRole, recruitId);
 
   const { page, perPage, skip } = parsePagination(query);
   const where: Prisma.IssueWhereInput = { userId: recruitId };
@@ -141,8 +153,8 @@ export async function getRecruitIssues(managerId: string, recruitId: string, que
   return buildPaginatedResponse(items, total, page, perPage);
 }
 
-export async function getRecruitFeedback(managerId: string, recruitId: string, query: Record<string, string>) {
-  await verifyRecruitAccess(managerId, recruitId);
+export async function getRecruitFeedback(managerId: string, callerRole: string, recruitId: string, query: Record<string, string>) {
+  await verifyRecruitAccess(managerId, callerRole, recruitId);
 
   const { page, perPage, skip } = parsePagination(query);
   const where: Prisma.FeedbackWhereInput = { userId: recruitId };
@@ -163,8 +175,8 @@ export async function getRecruitFeedback(managerId: string, recruitId: string, q
   return buildPaginatedResponse(items, total, page, perPage);
 }
 
-export async function getRecruitNotes(managerId: string, recruitId: string, query: Record<string, string>) {
-  await verifyRecruitAccess(managerId, recruitId);
+export async function getRecruitNotes(managerId: string, callerRole: string, recruitId: string, query: Record<string, string>) {
+  await verifyRecruitAccess(managerId, callerRole, recruitId);
 
   const { page, perPage, skip } = parsePagination(query);
   const where: Prisma.NoteWhereInput = { userId: recruitId };
