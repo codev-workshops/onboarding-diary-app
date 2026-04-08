@@ -35,7 +35,7 @@ export function validateBody(
 
 // Common validation helpers
 export const isRequired = (val: unknown): boolean =>
-  val !== undefined && val !== null && val !== "";
+  val !== undefined && val !== null && (typeof val !== "string" ? true : val.trim() !== "");
 
 export const isString = (val: unknown): boolean => typeof val === "string";
 

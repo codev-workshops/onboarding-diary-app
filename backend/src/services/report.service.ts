@@ -165,11 +165,12 @@ function generatePDFStream(
     doc.moveDown(0.5);
 
     for (const item of items) {
+      const enumFields = new Set(["category", "status", "priority", "severity", "type"]);
       for (const field of fields) {
         const value = item[field.key];
         const displayValue = field.key === "date" ? formatDate(value as string)
           : field.key === "tags" ? (value as string[]).join(", ")
-          : typeof value === "string" ? (value.includes("_") ? formatLabel(value) : value)
+          : typeof value === "string" ? (enumFields.has(field.key) ? formatLabel(value) : value)
           : String(value || "");
         doc.fontSize(10).font("Helvetica-Bold").text(`${field.label}: `, { continued: true })
           .font("Helvetica").text(displayValue);
