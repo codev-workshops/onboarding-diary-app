@@ -193,9 +193,11 @@ function AnalyticsPage() {
                       innerRadius={60}
                       outerRadius={100}
                       paddingAngle={3}
-                      label={({ severity, count }: { severity: string; count: number }) =>
-                        `${severity}: ${count}`
-                      }
+                      label={(props) => {
+                        const name = String(props.name ?? "");
+                        const val = Number(props.value ?? 0);
+                        return `${name}: ${val}`;
+                      }}
                     >
                       {data!.issues_by_severity.data.map((entry) => (
                         <Cell
