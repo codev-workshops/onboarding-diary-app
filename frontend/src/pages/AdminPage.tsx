@@ -449,6 +449,7 @@ export default function AdminPage() {
             ? `Are you sure you want to deactivate "${toggleTarget?.fullName}"? They will no longer be able to log in.`
             : `Are you sure you want to activate "${toggleTarget?.fullName}"?`
         }
+        confirmLabel={toggleTarget?.isActive ? "Deactivate" : "Activate"}
         loading={toggleLoading}
       />
 

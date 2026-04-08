@@ -102,7 +102,12 @@ export async function login(input: LoginInput) {
 }
 
 export async function refreshTokens(token: string) {
-  const payload = verifyRefreshToken(token);
+  let payload;
+  try {
+    payload = verifyRefreshToken(token);
+  } catch {
+    throw new UnauthorizedError("Invalid or expired refresh token");
+  }
 
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },

@@ -90,9 +90,9 @@ function generateCSV(data: Record<string, unknown[]>, category: string): string 
         Date: formatDate(i.date as string),
         Title: i.title as string,
         Description: i.description as string,
-        Category: formatLabel(i.severity as string),
+        Category: "",
         Status: formatLabel(i.status as string),
-        Priority: (i.resolutionNotes as string) || "",
+        Priority: formatLabel(i.severity as string),
       });
     }
   }
