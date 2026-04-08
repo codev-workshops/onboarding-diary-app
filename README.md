@@ -35,6 +35,8 @@ A web application for new recruits to document their onboarding journey. Users l
 - **Notes** — Free-form notes with tags
 - **Dashboard** — Summary statistics, completion rates, recent entries
 - **Reports** — Generate CSV/PDF reports by date range; managers can report on recruits
+- **Search** — Global search across all entry types with match highlighting and type filtering
+- **Analytics** — Interactive charts (task completion, issue severity, feedback distribution, activity timeline)
 - **Role-Based Access** — Recruit (own data), Manager (assigned recruits), Admin (all data)
 
 ## Quick Start
@@ -65,7 +67,18 @@ A web application for new recruits to document their onboarding journey. Users l
    docker compose exec backend alembic upgrade head
    ```
 
-5. Access the application:
+5. (Optional) Load sample data:
+   ```bash
+   docker compose exec backend python -m scripts.seed_data
+   ```
+   This creates 3 users and 26 sample entries across all categories:
+   | Account              | Password       | Role    |
+   |----------------------|----------------|---------|
+   | recruit@example.com  | Recruit123!    | Recruit |
+   | manager@example.com  | Manager123!    | Manager |
+   | admin@example.com    | Admin123!      | Admin   |
+
+6. Access the application:
    - **Frontend**: http://localhost:3000
    - **Backend API**: http://localhost:8000
    - **API Documentation (Swagger)**: http://localhost:8000/docs
@@ -98,6 +111,8 @@ Once the backend is running, interactive API docs are available at:
 | CRUD   | `/api/v1/notes`             | Notes management         |
 | GET    | `/api/v1/dashboard`         | Dashboard summary        |
 | POST   | `/api/v1/reports/generate`  | Generate CSV/PDF report  |
+| GET    | `/api/v1/search`            | Global search            |
+| GET    | `/api/v1/analytics`         | Analytics chart data     |
 
 ## Development
 
