@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
 import { ConfigProvider, Layout, Typography, Spin } from "antd";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import LoginPage from "./pages/LoginPage";
@@ -23,7 +23,7 @@ const Placeholder = ({ name }: { name: string }) => (
 
 function NavBar() {
   const { isAuthenticated } = useAuth();
-  const location = window.location.pathname;
+  const location = useLocation();
 
   if (!isAuthenticated) return null;
 
@@ -47,17 +47,20 @@ function NavBar() {
       }}
     >
       {items.map((item) => (
-        <a
+        <Link
           key={item.key}
-          href={item.key}
+          to={item.key}
           style={{
-            color: location === item.key ? "#1677ff" : "rgba(255,255,255,0.65)",
+            color:
+              location.pathname === item.key
+                ? "#1677ff"
+                : "rgba(255,255,255,0.65)",
             textDecoration: "none",
             fontSize: 14,
           }}
         >
           {item.label}
-        </a>
+        </Link>
       ))}
     </div>
   );

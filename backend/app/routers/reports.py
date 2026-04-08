@@ -1,7 +1,6 @@
 """Reports endpoints — generate, list, and download reports."""
 
 import csv
-import io
 import os
 import uuid
 
