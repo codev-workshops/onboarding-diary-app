@@ -4,3 +4,6 @@ export * as issueService from "./issue.service";
 export * as feedbackService from "./feedback.service";
 export * as noteService from "./note.service";
 export * as dashboardService from "./dashboard.service";
+export * as reportService from "./report.service";
+export * as managerService from "./manager.service";
+export * as adminService from "./admin.service";

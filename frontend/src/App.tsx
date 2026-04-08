@@ -8,7 +8,9 @@ import TasksPage from "./pages/TasksPage";
 import IssuesPage from "./pages/IssuesPage";
 import FeedbackPage from "./pages/FeedbackPage";
 import NotesPage from "./pages/NotesPage";
-import PlaceholderPage from "./pages/PlaceholderPage";
+import ReportsPage from "./pages/ReportsPage";
+import ManagerPage from "./pages/ManagerPage";
+import AdminPage from "./pages/AdminPage";
 
 function App() {
   return (
@@ -25,7 +27,9 @@ function App() {
           <Route path="/issues" element={<IssuesPage />} />
           <Route path="/feedback" element={<FeedbackPage />} />
           <Route path="/notes" element={<NotesPage />} />
-          <Route path="/reports" element={<PlaceholderPage title="Reports" />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/manager" element={<ManagerPage />} />
+          <Route path="/admin" element={<AdminPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
 
