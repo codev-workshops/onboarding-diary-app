@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import uuid
 from datetime import date, datetime
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -25,10 +28,10 @@ class IssueCreate(BaseModel):
     description: str = Field(min_length=10, max_length=5000)
     severity: IssueSeverity
     status: IssueStatus = IssueStatus.open
-    resolution_notes: str | None = Field(default=None, max_length=5000)
+    resolution_notes: Optional[str] = Field(default=None, max_length=5000)
 
     @model_validator(mode="after")
-    def validate_resolution_notes(self) -> "IssueCreate":
+    def validate_resolution_notes(self) -> IssueCreate:
         if self.status in (IssueStatus.resolved, IssueStatus.closed):
             if not self.resolution_notes:
                 raise ValueError(
@@ -38,12 +41,12 @@ class IssueCreate(BaseModel):
 
 
 class IssueUpdate(BaseModel):
-    date: date | None = None
-    title: str | None = Field(default=None, min_length=3, max_length=200)
-    description: str | None = Field(default=None, min_length=10, max_length=5000)
-    severity: IssueSeverity | None = None
-    status: IssueStatus | None = None
-    resolution_notes: str | None = Field(default=None, max_length=5000)
+    date: Optional[date] = None
+    title: Optional[str] = Field(default=None, min_length=3, max_length=200)
+    description: Optional[str] = Field(default=None, min_length=10, max_length=5000)
+    severity: Optional[IssueSeverity] = None
+    status: Optional[IssueStatus] = None
+    resolution_notes: Optional[str] = Field(default=None, max_length=5000)
 
 
 class IssueResponse(BaseModel):
@@ -54,7 +57,7 @@ class IssueResponse(BaseModel):
     description: str
     severity: str
     status: str
-    resolution_notes: str | None
+    resolution_notes: Optional[str]
     created_at: datetime
     updated_at: datetime
 

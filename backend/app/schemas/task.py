@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import uuid
 from datetime import date, datetime
 from enum import Enum
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -31,19 +34,19 @@ class TaskPriority(str, Enum):
 class TaskCreate(BaseModel):
     date: date
     title: str = Field(min_length=3, max_length=200)
-    description: str | None = Field(default=None, max_length=5000)
+    description: Optional[str] = Field(default=None, max_length=5000)
     category: TaskCategory
     status: TaskStatus = TaskStatus.not_started
     priority: TaskPriority = TaskPriority.medium
 
 
 class TaskUpdate(BaseModel):
-    date: date | None = None
-    title: str | None = Field(default=None, min_length=3, max_length=200)
-    description: str | None = Field(default=None, max_length=5000)
-    category: TaskCategory | None = None
-    status: TaskStatus | None = None
-    priority: TaskPriority | None = None
+    date: Optional[date] = None
+    title: Optional[str] = Field(default=None, min_length=3, max_length=200)
+    description: Optional[str] = Field(default=None, max_length=5000)
+    category: Optional[TaskCategory] = None
+    status: Optional[TaskStatus] = None
+    priority: Optional[TaskPriority] = None
 
 
 class TaskResponse(BaseModel):
@@ -51,7 +54,7 @@ class TaskResponse(BaseModel):
     user_id: uuid.UUID
     date: date
     title: str
-    description: str | None
+    description: Optional[str]
     category: str
     status: str
     priority: str
