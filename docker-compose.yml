@@ -23,15 +23,16 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-onboarding_diary}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-super-secret-change-me}
-      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
-      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: ${JWT_ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-onboarding_diary}
+      JWT_SECRET: ${JWT_SECRET:-super-secret-change-me}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-refresh-secret-change-me}
+      JWT_ACCESS_EXPIRY: ${JWT_ACCESS_EXPIRY:-15m}
+      JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY:-7d}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      NODE_ENV: production
+      PORT: "8000"
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend:/app
     depends_on:
       db:
         condition: service_healthy

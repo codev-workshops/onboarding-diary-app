@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  recruit
+  manager
+  admin
+}
+
+enum TaskStatus {
+  not_started
+  in_progress
+  completed
+  on_hold
+}
+
+enum TaskPriority {
+  low
+  medium
+  high
+  critical
+}
+
+enum TaskCategory {
+  training
+  documentation
+  meeting
+  setup
+  development
+  other
+}
+
+enum IssueSeverity {
+  low
+  medium
+  high
+  critical
+}
+
+enum IssueStatus {
+  open
+  in_progress
+  resolved
+  closed
+}
+
+enum FeedbackType {
+  positive
+  suggestion
+  concern
+}
+
+enum ReportType {
+  tasks
+  issues
+  feedback
+  combined
+}
+
+enum ReportFormat {
+  pdf
+  csv
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  fullName     String   @map("full_name") @db.VarChar(150)
+  role         Role     @default(recruit)
+  department   String?  @db.VarChar(100)
+  startDate    DateTime? @map("start_date") @db.Date
+  managerId    String?  @map("manager_id") @db.Uuid
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  manager      User?    @relation("ManagerRecruits", fields: [managerId], references: [id], onDelete: SetNull)
+  recruits     User[]   @relation("ManagerRecruits")
+
+  tasks        Task[]
+  issues       Issue[]
+  feedback     Feedback[]
+  notes        Note[]
+  generatedReports Report[] @relation("GeneratedReports")
+  targetReports    Report[] @relation("TargetReports")
+
+  @@index([managerId], name: "idx_users_manager_id")
+  @@index([role], name: "idx_users_role")
+  @@map("users")
+}
+
+model Task {
+  id          String       @id @default(uuid()) @db.Uuid
+  userId      String       @map("user_id") @db.Uuid
+  date        DateTime     @db.Date
+  title       String       @db.VarChar(200)
+  description String?      @db.Text
+  category    TaskCategory
+  status      TaskStatus   @default(not_started)
+  priority    TaskPriority @default(medium)
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], name: "idx_tasks_user_id")
+  @@index([date], name: "idx_tasks_date")
+  @@index([status], name: "idx_tasks_status")
+  @@index([category], name: "idx_tasks_category")
+  @@map("tasks")
+}
+
+model Issue {
+  id              String        @id @default(uuid()) @db.Uuid
+  userId          String        @map("user_id") @db.Uuid
+  date            DateTime      @db.Date
+  title           String        @db.VarChar(200)
+  description     String        @db.Text
+  severity        IssueSeverity
+  status          IssueStatus   @default(open)
+  resolutionNotes String?       @map("resolution_notes") @db.Text
+  createdAt       DateTime      @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt       DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], name: "idx_issues_user_id")
+  @@index([date], name: "idx_issues_date")
+  @@index([status], name: "idx_issues_status")
+  @@index([severity], name: "idx_issues_severity")
+  @@map("issues")
+}
+
+model Feedback {
+  id        String       @id @default(uuid()) @db.Uuid
+  userId    String       @map("user_id") @db.Uuid
+  date      DateTime     @db.Date
+  subject   String       @db.VarChar(200)
+  type      FeedbackType
+  details   String       @db.Text
+  createdAt DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], name: "idx_feedback_user_id")
+  @@index([date], name: "idx_feedback_date")
+  @@index([type], name: "idx_feedback_type")
+  @@map("feedback")
+}
+
+model Note {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  date      DateTime @db.Date
+  title     String   @db.VarChar(200)
+  content   String   @db.Text
+  tags      String[] @default([])
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], name: "idx_notes_user_id")
+  @@index([date], name: "idx_notes_date")
+  @@map("notes")
+}
+
+model Report {
+  id           String       @id @default(uuid()) @db.Uuid
+  generatedBy  String       @map("generated_by") @db.Uuid
+  targetUserId String?      @map("target_user_id") @db.Uuid
+  dateFrom     DateTime     @map("date_from") @db.Date
+  dateTo       DateTime     @map("date_to") @db.Date
+  reportType   ReportType   @map("report_type")
+  format       ReportFormat
+  filePath     String       @map("file_path") @db.VarChar(500)
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+
+  generatedByUser User      @relation("GeneratedReports", fields: [generatedBy], references: [id])
+  targetUser      User?     @relation("TargetReports", fields: [targetUserId], references: [id])
+
+  @@index([generatedBy], name: "idx_reports_generated_by")
+  @@index([targetUserId], name: "idx_reports_target_user_id")
+  @@map("reports")
+}
