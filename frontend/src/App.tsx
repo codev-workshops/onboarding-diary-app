@@ -8,6 +8,7 @@ import {
   MessageOutlined,
   FileTextOutlined,
   BarChartOutlined,
+  SearchOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
 import { AuthProvider } from "./context/AuthProvider";
@@ -20,6 +21,7 @@ import IssuesPage from "./pages/IssuesPage";
 import FeedbackPage from "./pages/FeedbackPage";
 import NotesPage from "./pages/NotesPage";
 import ReportsPage from "./pages/ReportsPage";
+import SearchPage from "./pages/SearchPage";
 import type { ReactNode } from "react";
 
 const { Content, Sider, Footer } = Layout;
@@ -40,6 +42,7 @@ function Sidebar() {
     { key: "/feedback", icon: <MessageOutlined />, label: "Feedback" },
     { key: "/notes", icon: <FileTextOutlined />, label: "Notes" },
     { key: "/reports", icon: <BarChartOutlined />, label: "Reports" },
+    { key: "/search", icon: <SearchOutlined />, label: "Search" },
   ];
 
   const handleMenuClick = ({ key }: { key: string }) => {
@@ -243,6 +246,14 @@ function AppLayout() {
               element={
                 <ProtectedRoute>
                   <ReportsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/search"
+              element={
+                <ProtectedRoute>
+                  <SearchPage />
                 </ProtectedRoute>
               }
             />

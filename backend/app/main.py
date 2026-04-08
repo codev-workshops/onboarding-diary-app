@@ -8,6 +8,7 @@ from app.routers.feedback import router as feedback_router
 from app.routers.issues import router as issues_router
 from app.routers.notes import router as notes_router
 from app.routers.reports import router as reports_router
+from app.routers.search import router as search_router
 from app.routers.tasks import router as tasks_router
 
 app = FastAPI(
@@ -33,6 +34,7 @@ app.include_router(feedback_router)
 app.include_router(notes_router)
 app.include_router(dashboard_router)
 app.include_router(reports_router)
+app.include_router(search_router)
 
 
 @app.get("/api/health")
