@@ -1,20 +1,19 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   Card,
   Col,
   Row,
   Statistic,
   Typography,
-  Button,
   List,
   Tag,
   Spin,
   message,
   Space,
+  Empty,
 } from "antd";
 import {
-  LogoutOutlined,
   CheckCircleOutlined,
   ExclamationCircleOutlined,
   MessageOutlined,
@@ -22,19 +21,13 @@ import {
   UnorderedListOutlined,
   PercentageOutlined,
 } from "@ant-design/icons";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { dashboardApi } from "../api/dashboard";
-import type {
-  DashboardResponse,
-  ManagerDashboardResponse,
-} from "../types/dashboard";
+import type { DashboardResponse, ManagerDashboardResponse } from "../types/dashboard";
 
 const { Title } = Typography;
 
-const ENTRY_TYPE_CONFIG: Record<
-  string,
-  { color: string; label: string; path: string }
-> = {
+const ENTRY_TYPE_CONFIG: Record<string, { color: string; label: string; path: string }> = {
   task: { color: "blue", label: "Task", path: "/tasks" },
   issue: { color: "red", label: "Issue", path: "/issues" },
   feedback: { color: "green", label: "Feedback", path: "/feedback" },
@@ -42,14 +35,10 @@ const ENTRY_TYPE_CONFIG: Record<
 };
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(
-    null
-  );
-  const [managerData, setManagerData] =
-    useState<ManagerDashboardResponse | null>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(null);
+  const [managerData, setManagerData] = useState<ManagerDashboardResponse | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,11 +62,6 @@ export default function DashboardPage() {
     };
     fetchData();
   }, [user?.role]);
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
 
   if (loading) {
     return (
@@ -105,9 +89,6 @@ export default function DashboardPage() {
         <Space>
           <Tag color="blue">{user?.role}</Tag>
           <span>{user?.full_name}</span>
-          <Button icon={<LogoutOutlined />} onClick={handleLogout}>
-            Logout
-          </Button>
         </Space>
       </div>
 
@@ -176,8 +157,7 @@ export default function DashboardPage() {
 
       {/* Recent Entries */}
       <Card title="Recent Entries" style={{ marginBottom: 24 }}>
-        {dashboardData?.recent_entries &&
-        dashboardData.recent_entries.length > 0 ? (
+        {dashboardData?.recent_entries && dashboardData.recent_entries.length > 0 ? (
           <List
             dataSource={dashboardData.recent_entries}
             renderItem={(entry) => {
@@ -213,9 +193,10 @@ export default function DashboardPage() {
             }}
           />
         ) : (
-          <p>
-            No entries yet. Start by creating tasks, issues, feedback, or notes.
-          </p>
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description="No entries yet. Start by creating tasks, issues, feedback, or notes."
+          />
         )}
       </Card>
 
@@ -224,10 +205,7 @@ export default function DashboardPage() {
         <Card title="Recruits Overview">
           <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
             <Col xs={24} sm={8}>
-              <Statistic
-                title="Total Recruits"
-                value={managerData.recruits.length}
-              />
+              <Statistic title="Total Recruits" value={managerData.recruits.length} />
             </Col>
             <Col xs={24} sm={8}>
               <Statistic
@@ -254,12 +232,8 @@ export default function DashboardPage() {
                 />
                 <Space>
                   <Tag color="blue">{recruit.summary.total_tasks} tasks</Tag>
-                  <Tag color="red">
-                    {recruit.summary.open_issues} open issues
-                  </Tag>
-                  <Tag color="green">
-                    {recruit.summary.task_completion_rate}% done
-                  </Tag>
+                  <Tag color="red">{recruit.summary.open_issues} open issues</Tag>
+                  <Tag color="green">{recruit.summary.task_completion_rate}% done</Tag>
                 </Space>
               </List.Item>
             )}

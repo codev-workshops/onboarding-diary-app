@@ -1,5 +1,5 @@
-import apiClient from './client';
-import type { Issue, IssueCreate, IssueUpdate, PaginatedIssueResponse } from '../types/issue';
+import apiClient from "./client";
+import type { Issue, IssueCreate, IssueUpdate, PaginatedIssueResponse } from "../types/issue";
 
 interface IssueListParams {
   date_from?: string;
@@ -12,12 +12,12 @@ interface IssueListParams {
 
 export const issueApi = {
   create: async (data: IssueCreate): Promise<Issue> => {
-    const response = await apiClient.post<Issue>('/issues/', data);
+    const response = await apiClient.post<Issue>("/issues/", data);
     return response.data;
   },
 
   list: async (params?: IssueListParams): Promise<PaginatedIssueResponse> => {
-    const response = await apiClient.get<PaginatedIssueResponse>('/issues/', { params });
+    const response = await apiClient.get<PaginatedIssueResponse>("/issues/", { params });
     return response.data;
   },
 

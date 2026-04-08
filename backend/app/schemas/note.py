@@ -1,6 +1,5 @@
-import uuid
 import datetime as _dt
-from typing import Optional
+import uuid
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -27,14 +26,14 @@ class NoteCreate(BaseModel):
 
 
 class NoteUpdate(BaseModel):
-    date: Optional[_dt.date] = None
-    title: Optional[str] = Field(default=None, min_length=3, max_length=200)
-    content: Optional[str] = Field(default=None, min_length=1, max_length=10000)
-    tags: Optional[list[str]] = Field(default=None, max_length=10)
+    date: _dt.date | None = None
+    title: str | None = Field(default=None, min_length=3, max_length=200)
+    content: str | None = Field(default=None, min_length=1, max_length=10000)
+    tags: list[str] | None = Field(default=None, max_length=10)
 
     @field_validator("tags")
     @classmethod
-    def validate_tags(cls, v: Optional[list[str]]) -> Optional[list[str]]:
+    def validate_tags(cls, v: list[str] | None) -> list[str] | None:
         if v is None:
             return v
         import re

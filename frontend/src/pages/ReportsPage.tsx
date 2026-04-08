@@ -12,20 +12,13 @@ import {
   Tag,
   Row,
   Col,
+  Empty,
 } from "antd";
-import {
-  DownloadOutlined,
-  FileExcelOutlined,
-  FilePdfOutlined,
-} from "@ant-design/icons";
+import { DownloadOutlined, FileExcelOutlined, FilePdfOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { reportsApi } from "../api/reports";
-import type {
-  ReportRecord,
-  PaginatedReportResponse,
-  RecruitOption,
-} from "../types/report";
+import type { ReportRecord, PaginatedReportResponse, RecruitOption } from "../types/report";
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -41,16 +34,11 @@ export default function ReportsPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [dateRange, setDateRange] = useState<
-    [dayjs.Dayjs | null, dayjs.Dayjs | null] | null
-  >(null);
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null] | null>(null);
   const [reportType, setReportType] = useState<string>("combined");
-  const [selectedRecruit, setSelectedRecruit] = useState<string | undefined>(
-    undefined
-  );
+  const [selectedRecruit, setSelectedRecruit] = useState<string | undefined>(undefined);
   const [recruits, setRecruits] = useState<RecruitOption[]>([]);
-  const [reportHistory, setReportHistory] =
-    useState<PaginatedReportResponse | null>(null);
+  const [reportHistory, setReportHistory] = useState<PaginatedReportResponse | null>(null);
   const [historyPage, setHistoryPage] = useState(1);
 
   const isManager = user?.role === "manager" || user?.role === "admin";
@@ -126,8 +114,7 @@ export default function ReportsPage() {
     {
       title: "Date Range",
       key: "range",
-      render: (_: unknown, record: ReportRecord) =>
-        `${record.date_from} — ${record.date_to}`,
+      render: (_: unknown, record: ReportRecord) => `${record.date_from} — ${record.date_to}`,
     },
     {
       title: "Type",
@@ -142,9 +129,7 @@ export default function ReportsPage() {
       dataIndex: "format",
       key: "format",
       render: (fmt: string) => (
-        <Tag color={fmt === "pdf" ? "red" : "green"}>
-          {fmt.toUpperCase()}
-        </Tag>
+        <Tag color={fmt === "pdf" ? "red" : "green"}>{fmt.toUpperCase()}</Tag>
       ),
     },
     {
@@ -157,11 +142,7 @@ export default function ReportsPage() {
       title: "Action",
       key: "action",
       render: (_: unknown, record: ReportRecord) => (
-        <Button
-          type="link"
-          icon={<DownloadOutlined />}
-          onClick={() => handleDownload(record.id)}
-        >
+        <Button type="link" icon={<DownloadOutlined />} onClick={() => handleDownload(record.id)}>
           Download
         </Button>
       ),
@@ -251,6 +232,14 @@ export default function ReportsPage() {
             dataSource={reportHistory?.items ?? []}
             columns={historyColumns}
             rowKey="id"
+            locale={{
+              emptyText: (
+                <Empty
+                  image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  description="No reports generated yet. Use the form above to create one."
+                />
+              ),
+            }}
             pagination={{
               current: historyPage,
               total: reportHistory?.total ?? 0,

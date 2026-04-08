@@ -1,5 +1,10 @@
-import apiClient from './client';
-import type { Feedback, FeedbackCreate, FeedbackUpdate, PaginatedFeedbackResponse } from '../types/feedback';
+import apiClient from "./client";
+import type {
+  Feedback,
+  FeedbackCreate,
+  FeedbackUpdate,
+  PaginatedFeedbackResponse,
+} from "../types/feedback";
 
 interface FeedbackListParams {
   date_from?: string;
@@ -11,12 +16,12 @@ interface FeedbackListParams {
 
 export const feedbackApi = {
   create: async (data: FeedbackCreate): Promise<Feedback> => {
-    const response = await apiClient.post<Feedback>('/feedback/', data);
+    const response = await apiClient.post<Feedback>("/feedback/", data);
     return response.data;
   },
 
   list: async (params?: FeedbackListParams): Promise<PaginatedFeedbackResponse> => {
-    const response = await apiClient.get<PaginatedFeedbackResponse>('/feedback/', { params });
+    const response = await apiClient.get<PaginatedFeedbackResponse>("/feedback/", { params });
     return response.data;
   },
 

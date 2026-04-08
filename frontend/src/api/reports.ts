@@ -7,20 +7,12 @@ import type {
 } from "../types/report";
 
 export const reportsApi = {
-  generate: async (
-    data: ReportGenerateRequest
-  ): Promise<ReportGenerateResponse> => {
-    const response = await apiClient.post<ReportGenerateResponse>(
-      "/reports/generate",
-      data
-    );
+  generate: async (data: ReportGenerateRequest): Promise<ReportGenerateResponse> => {
+    const response = await apiClient.post<ReportGenerateResponse>("/reports/generate", data);
     return response.data;
   },
 
-  list: async (
-    page: number = 1,
-    perPage: number = 10
-  ): Promise<PaginatedReportResponse> => {
+  list: async (page: number = 1, perPage: number = 10): Promise<PaginatedReportResponse> => {
     const response = await apiClient.get<PaginatedReportResponse>("/reports/", {
       params: { page, per_page: perPage },
     });

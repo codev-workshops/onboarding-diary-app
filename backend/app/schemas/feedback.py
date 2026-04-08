@@ -1,7 +1,6 @@
-import uuid
 import datetime as _dt
+import uuid
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -22,10 +21,10 @@ class FeedbackCreate(BaseModel):
 
 
 class FeedbackUpdate(BaseModel):
-    date: Optional[_dt.date] = None
-    subject: Optional[str] = Field(default=None, min_length=3, max_length=200)
-    feedback_type: Optional[FeedbackType] = Field(default=None, alias="type")
-    details: Optional[str] = Field(default=None, min_length=10, max_length=5000)
+    date: _dt.date | None = None
+    subject: str | None = Field(default=None, min_length=3, max_length=200)
+    feedback_type: FeedbackType | None = Field(default=None, alias="type")
+    details: str | None = Field(default=None, min_length=10, max_length=5000)
 
     model_config = {"populate_by_name": True}
 

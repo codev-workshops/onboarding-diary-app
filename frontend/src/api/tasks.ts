@@ -1,5 +1,5 @@
-import apiClient from './client';
-import type { Task, TaskCreate, TaskUpdate, PaginatedTaskResponse } from '../types/task';
+import apiClient from "./client";
+import type { Task, TaskCreate, TaskUpdate, PaginatedTaskResponse } from "../types/task";
 
 interface TaskListParams {
   date_from?: string;
@@ -12,12 +12,12 @@ interface TaskListParams {
 
 export const taskApi = {
   create: async (data: TaskCreate): Promise<Task> => {
-    const response = await apiClient.post<Task>('/tasks/', data);
+    const response = await apiClient.post<Task>("/tasks/", data);
     return response.data;
   },
 
   list: async (params?: TaskListParams): Promise<PaginatedTaskResponse> => {
-    const response = await apiClient.get<PaginatedTaskResponse>('/tasks/', { params });
+    const response = await apiClient.get<PaginatedTaskResponse>("/tasks/", { params });
     return response.data;
   },
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 import {
   Typography,
   Button,
@@ -15,16 +15,12 @@ import {
   Card,
   Row,
   Col,
-} from 'antd';
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  FilterOutlined,
-} from '@ant-design/icons';
-import dayjs from 'dayjs';
-import { noteApi } from '../api/notes';
-import type { Note, NoteCreate, NoteUpdate } from '../types/note';
+  Empty,
+} from "antd";
+import { PlusOutlined, EditOutlined, DeleteOutlined, FilterOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
+import { noteApi } from "../api/notes";
+import type { Note, NoteCreate, NoteUpdate } from "../types/note";
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -48,14 +44,14 @@ export default function NotesPage() {
       const params: Record<string, string | number> = { page, per_page: perPage };
       if (filterTags) params.tags = filterTags;
       if (filterDates) {
-        params.date_from = filterDates[0].format('YYYY-MM-DD');
-        params.date_to = filterDates[1].format('YYYY-MM-DD');
+        params.date_from = filterDates[0].format("YYYY-MM-DD");
+        params.date_to = filterDates[1].format("YYYY-MM-DD");
       }
       const data = await noteApi.list(params);
       setNotes(data.items);
       setTotal(data.total);
     } catch {
-      message.error('Failed to load notes');
+      message.error("Failed to load notes");
     } finally {
       setLoading(false);
     }
@@ -87,10 +83,10 @@ export default function NotesPage() {
   const handleDelete = async (id: string) => {
     try {
       await noteApi.delete(id);
-      message.success('Note deleted');
+      message.success("Note deleted");
       fetchNotes();
     } catch {
-      message.error('Failed to delete note');
+      message.error("Failed to delete note");
     }
   };
 
@@ -99,15 +95,15 @@ export default function NotesPage() {
       const values = await form.validateFields();
       const payload = {
         ...values,
-        date: values.date.format('YYYY-MM-DD'),
+        date: values.date.format("YYYY-MM-DD"),
       };
 
       if (editingNote) {
         await noteApi.update(editingNote.id, payload as NoteUpdate);
-        message.success('Note updated');
+        message.success("Note updated");
       } else {
         await noteApi.create(payload as NoteCreate);
-        message.success('Note created');
+        message.success("Note created");
       }
       setModalOpen(false);
       fetchNotes();
@@ -118,29 +114,29 @@ export default function NotesPage() {
 
   const columns = [
     {
-      title: 'Date',
-      dataIndex: 'date',
-      key: 'date',
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
       width: 110,
-      render: (d: string) => dayjs(d).format('MMM D, YYYY'),
+      render: (d: string) => dayjs(d).format("MMM D, YYYY"),
     },
     {
-      title: 'Title',
-      dataIndex: 'title',
-      key: 'title',
+      title: "Title",
+      dataIndex: "title",
+      key: "title",
       ellipsis: true,
     },
     {
-      title: 'Content',
-      dataIndex: 'content',
-      key: 'content',
+      title: "Content",
+      dataIndex: "content",
+      key: "content",
       ellipsis: true,
       width: 300,
     },
     {
-      title: 'Tags',
-      dataIndex: 'tags',
-      key: 'tags',
+      title: "Tags",
+      dataIndex: "tags",
+      key: "tags",
       width: 200,
       render: (tags: string[]) =>
         tags.map((tag) => (
@@ -150,8 +146,8 @@ export default function NotesPage() {
         )),
     },
     {
-      title: 'Actions',
-      key: 'actions',
+      title: "Actions",
+      key: "actions",
       width: 120,
       render: (_: unknown, record: Note) => (
         <Space>
@@ -161,10 +157,7 @@ export default function NotesPage() {
             onClick={() => handleEdit(record)}
             size="small"
           />
-          <Popconfirm
-            title="Delete this note?"
-            onConfirm={() => handleDelete(record.id)}
-          >
+          <Popconfirm title="Delete this note?" onConfirm={() => handleDelete(record.id)}>
             <Button type="link" danger icon={<DeleteOutlined />} size="small" />
           </Popconfirm>
         </Space>
@@ -174,8 +167,17 @@ export default function NotesPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Title level={2} style={{ margin: 0 }}>Notes</Title>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 16,
+        }}
+      >
+        <Title level={2} style={{ margin: 0 }}>
+          Notes
+        </Title>
         <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
           New Note
         </Button>
@@ -199,9 +201,7 @@ export default function NotesPage() {
           <Col>
             <RangePicker
               value={filterDates}
-              onChange={(dates) =>
-                setFilterDates(dates as [dayjs.Dayjs, dayjs.Dayjs] | null)
-              }
+              onChange={(dates) => setFilterDates(dates as [dayjs.Dayjs, dayjs.Dayjs] | null)}
             />
           </Col>
         </Row>
@@ -212,6 +212,14 @@ export default function NotesPage() {
         dataSource={notes}
         rowKey="id"
         loading={loading}
+        locale={{
+          emptyText: (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="No notes yet. Click 'New Note' to start writing."
+            />
+          ),
+        }}
         pagination={{
           current: page,
           pageSize: perPage,
@@ -222,24 +230,24 @@ export default function NotesPage() {
       />
 
       <Modal
-        title={editingNote ? 'Edit Note' : 'New Note'}
+        title={editingNote ? "Edit Note" : "New Note"}
         open={modalOpen}
         onOk={handleSubmit}
         onCancel={() => setModalOpen(false)}
-        okText={editingNote ? 'Update' : 'Create'}
+        okText={editingNote ? "Update" : "Create"}
         width={600}
       >
         <Form form={form} layout="vertical">
           <Form.Item name="date" label="Date" rules={[{ required: true }]}>
-            <DatePicker style={{ width: '100%' }} />
+            <DatePicker style={{ width: "100%" }} />
           </Form.Item>
           <Form.Item
             name="title"
             label="Title"
             rules={[
-              { required: true, message: 'Title is required' },
-              { min: 3, message: 'Title must be at least 3 characters' },
-              { max: 200, message: 'Title must be at most 200 characters' },
+              { required: true, message: "Title is required" },
+              { min: 3, message: "Title must be at least 3 characters" },
+              { max: 200, message: "Title must be at most 200 characters" },
             ]}
           >
             <Input />
@@ -248,20 +256,16 @@ export default function NotesPage() {
             name="content"
             label="Content"
             rules={[
-              { required: true, message: 'Content is required' },
-              { min: 1, message: 'Content cannot be empty' },
+              { required: true, message: "Content is required" },
+              { min: 1, message: "Content cannot be empty" },
             ]}
           >
             <TextArea rows={6} maxLength={10000} showCount />
           </Form.Item>
-          <Form.Item
-            name="tags"
-            label="Tags"
-            extra="Add tags to categorize your note (max 10)"
-          >
+          <Form.Item name="tags" label="Tags" extra="Add tags to categorize your note (max 10)">
             <Select
               mode="tags"
-              style={{ width: '100%' }}
+              style={{ width: "100%" }}
               placeholder="Type and press Enter to add tags"
               maxCount={10}
             />

@@ -3,12 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.routers.auth import router as auth_router
-from app.routers.tasks import router as tasks_router
-from app.routers.issues import router as issues_router
-from app.routers.feedback import router as feedback_router
-from app.routers.notes import router as notes_router
 from app.routers.dashboard import router as dashboard_router
+from app.routers.feedback import router as feedback_router
+from app.routers.issues import router as issues_router
+from app.routers.notes import router as notes_router
 from app.routers.reports import router as reports_router
+from app.routers.tasks import router as tasks_router
 
 app = FastAPI(
     title=settings.APP_NAME,

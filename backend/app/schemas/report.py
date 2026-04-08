@@ -1,7 +1,6 @@
-import uuid
 import datetime as _dt
+import uuid
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -23,7 +22,7 @@ class ReportGenerateRequest(BaseModel):
     date_to: _dt.date
     report_type: ReportType = Field(alias="type")
     report_format: ReportFormat = Field(alias="format")
-    user_id: Optional[uuid.UUID] = None
+    user_id: uuid.UUID | None = None
 
     model_config = {"populate_by_name": True}
 
@@ -31,7 +30,7 @@ class ReportGenerateRequest(BaseModel):
 class ReportResponse(BaseModel):
     id: uuid.UUID
     generated_by: uuid.UUID
-    target_user_id: Optional[uuid.UUID]
+    target_user_id: uuid.UUID | None
     date_from: _dt.date
     date_to: _dt.date
     report_type: str

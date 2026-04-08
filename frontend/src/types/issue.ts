@@ -1,16 +1,16 @@
 export const IssueSeverity = {
-  LOW: 'low',
-  MEDIUM: 'medium',
-  HIGH: 'high',
-  CRITICAL: 'critical',
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high",
+  CRITICAL: "critical",
 } as const;
 export type IssueSeverity = (typeof IssueSeverity)[keyof typeof IssueSeverity];
 
 export const IssueStatus = {
-  OPEN: 'open',
-  IN_PROGRESS: 'in_progress',
-  RESOLVED: 'resolved',
-  CLOSED: 'closed',
+  OPEN: "open",
+  IN_PROGRESS: "in_progress",
+  RESOLVED: "resolved",
+  CLOSED: "closed",
 } as const;
 export type IssueStatus = (typeof IssueStatus)[keyof typeof IssueStatus];
 

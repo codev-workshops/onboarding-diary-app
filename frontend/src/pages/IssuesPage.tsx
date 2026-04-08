@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 import {
   Typography,
   Button,
@@ -15,34 +15,30 @@ import {
   Card,
   Row,
   Col,
-} from 'antd';
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  FilterOutlined,
-} from '@ant-design/icons';
-import dayjs from 'dayjs';
-import { issueApi } from '../api/issues';
-import type { Issue, IssueCreate, IssueUpdate } from '../types/issue';
-import { IssueSeverity, IssueStatus } from '../types/issue';
+  Empty,
+} from "antd";
+import { PlusOutlined, EditOutlined, DeleteOutlined, FilterOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
+import { issueApi } from "../api/issues";
+import type { Issue, IssueCreate, IssueUpdate } from "../types/issue";
+import { IssueSeverity, IssueStatus } from "../types/issue";
 
 const { Title } = Typography;
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
 
 const severityColors: Record<string, string> = {
-  low: 'green',
-  medium: 'gold',
-  high: 'orange',
-  critical: 'red',
+  low: "green",
+  medium: "gold",
+  high: "orange",
+  critical: "red",
 };
 
 const statusColors: Record<string, string> = {
-  open: 'error',
-  in_progress: 'processing',
-  resolved: 'success',
-  closed: 'default',
+  open: "error",
+  in_progress: "processing",
+  resolved: "success",
+  closed: "default",
 };
 
 export default function IssuesPage() {
@@ -65,14 +61,14 @@ export default function IssuesPage() {
       if (filterSeverity) params.severity = filterSeverity;
       if (filterStatus) params.status = filterStatus;
       if (filterDates) {
-        params.date_from = filterDates[0].format('YYYY-MM-DD');
-        params.date_to = filterDates[1].format('YYYY-MM-DD');
+        params.date_from = filterDates[0].format("YYYY-MM-DD");
+        params.date_to = filterDates[1].format("YYYY-MM-DD");
       }
       const data = await issueApi.list(params);
       setIssues(data.items);
       setTotal(data.total);
     } catch {
-      message.error('Failed to load issues');
+      message.error("Failed to load issues");
     } finally {
       setLoading(false);
     }
@@ -105,10 +101,10 @@ export default function IssuesPage() {
   const handleDelete = async (id: string) => {
     try {
       await issueApi.delete(id);
-      message.success('Issue deleted');
+      message.success("Issue deleted");
       fetchIssues();
     } catch {
-      message.error('Failed to delete issue');
+      message.error("Failed to delete issue");
     }
   };
 
@@ -117,15 +113,15 @@ export default function IssuesPage() {
       const values = await form.validateFields();
       const payload = {
         ...values,
-        date: values.date.format('YYYY-MM-DD'),
+        date: values.date.format("YYYY-MM-DD"),
       };
 
       if (editingIssue) {
         await issueApi.update(editingIssue.id, payload as IssueUpdate);
-        message.success('Issue updated');
+        message.success("Issue updated");
       } else {
         await issueApi.create(payload as IssueCreate);
-        message.success('Issue created');
+        message.success("Issue created");
       }
       setModalOpen(false);
       fetchIssues();
@@ -136,37 +132,35 @@ export default function IssuesPage() {
 
   const columns = [
     {
-      title: 'Date',
-      dataIndex: 'date',
-      key: 'date',
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
       width: 110,
-      render: (d: string) => dayjs(d).format('MMM D, YYYY'),
+      render: (d: string) => dayjs(d).format("MMM D, YYYY"),
     },
     {
-      title: 'Title',
-      dataIndex: 'title',
-      key: 'title',
+      title: "Title",
+      dataIndex: "title",
+      key: "title",
       ellipsis: true,
     },
     {
-      title: 'Severity',
-      dataIndex: 'severity',
-      key: 'severity',
+      title: "Severity",
+      dataIndex: "severity",
+      key: "severity",
       width: 100,
       render: (s: string) => <Tag color={severityColors[s]}>{s}</Tag>,
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
       width: 120,
-      render: (s: string) => (
-        <Tag color={statusColors[s]}>{s.replace(/_/g, ' ')}</Tag>
-      ),
+      render: (s: string) => <Tag color={statusColors[s]}>{s.replace(/_/g, " ")}</Tag>,
     },
     {
-      title: 'Actions',
-      key: 'actions',
+      title: "Actions",
+      key: "actions",
       width: 120,
       render: (_: unknown, record: Issue) => (
         <Space>
@@ -176,10 +170,7 @@ export default function IssuesPage() {
             onClick={() => handleEdit(record)}
             size="small"
           />
-          <Popconfirm
-            title="Delete this issue?"
-            onConfirm={() => handleDelete(record.id)}
-          >
+          <Popconfirm title="Delete this issue?" onConfirm={() => handleDelete(record.id)}>
             <Button type="link" danger icon={<DeleteOutlined />} size="small" />
           </Popconfirm>
         </Space>
@@ -189,8 +180,17 @@ export default function IssuesPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Title level={2} style={{ margin: 0 }}>Issues</Title>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 16,
+        }}
+      >
+        <Title level={2} style={{ margin: 0 }}>
+          Issues
+        </Title>
         <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
           New Issue
         </Button>
@@ -222,7 +222,7 @@ export default function IssuesPage() {
               value={filterStatus}
               onChange={setFilterStatus}
               options={Object.values(IssueStatus).map((s) => ({
-                label: s.replace(/_/g, ' '),
+                label: s.replace(/_/g, " "),
                 value: s,
               }))}
             />
@@ -230,9 +230,7 @@ export default function IssuesPage() {
           <Col>
             <RangePicker
               value={filterDates}
-              onChange={(dates) =>
-                setFilterDates(dates as [dayjs.Dayjs, dayjs.Dayjs] | null)
-              }
+              onChange={(dates) => setFilterDates(dates as [dayjs.Dayjs, dayjs.Dayjs] | null)}
             />
           </Col>
         </Row>
@@ -243,6 +241,14 @@ export default function IssuesPage() {
         dataSource={issues}
         rowKey="id"
         loading={loading}
+        locale={{
+          emptyText: (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="No issues logged yet. Click 'New Issue' to report one."
+            />
+          ),
+        }}
         pagination={{
           current: page,
           pageSize: perPage,
@@ -253,24 +259,24 @@ export default function IssuesPage() {
       />
 
       <Modal
-        title={editingIssue ? 'Edit Issue' : 'New Issue'}
+        title={editingIssue ? "Edit Issue" : "New Issue"}
         open={modalOpen}
         onOk={handleSubmit}
         onCancel={() => setModalOpen(false)}
-        okText={editingIssue ? 'Update' : 'Create'}
+        okText={editingIssue ? "Update" : "Create"}
         width={600}
       >
         <Form form={form} layout="vertical">
           <Form.Item name="date" label="Date" rules={[{ required: true }]}>
-            <DatePicker style={{ width: '100%' }} />
+            <DatePicker style={{ width: "100%" }} />
           </Form.Item>
           <Form.Item
             name="title"
             label="Title"
             rules={[
-              { required: true, message: 'Title is required' },
-              { min: 3, message: 'Title must be at least 3 characters' },
-              { max: 200, message: 'Title must be at most 200 characters' },
+              { required: true, message: "Title is required" },
+              { min: 3, message: "Title must be at least 3 characters" },
+              { max: 200, message: "Title must be at most 200 characters" },
             ]}
           >
             <Input />
@@ -279,8 +285,8 @@ export default function IssuesPage() {
             name="description"
             label="Description"
             rules={[
-              { required: true, message: 'Description is required' },
-              { min: 10, message: 'Description must be at least 10 characters' },
+              { required: true, message: "Description is required" },
+              { min: 10, message: "Description must be at least 10 characters" },
             ]}
           >
             <TextArea rows={4} maxLength={5000} showCount />
@@ -300,7 +306,7 @@ export default function IssuesPage() {
               <Form.Item name="status" label="Status" rules={[{ required: true }]}>
                 <Select
                   options={Object.values(IssueStatus).map((s) => ({
-                    label: s.replace(/_/g, ' '),
+                    label: s.replace(/_/g, " "),
                     value: s,
                   }))}
                 />

@@ -17,9 +17,7 @@ from app.schemas.user import (
 router = APIRouter(prefix="/api/v1/auth", tags=["Authentication"])
 
 
-@router.post(
-    "/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED
-)
+@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(payload: UserRegister, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == payload.email))
     existing = result.scalar_one_or_none()

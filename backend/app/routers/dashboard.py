@@ -26,9 +26,7 @@ router = APIRouter(prefix="/api/v1/dashboard", tags=["dashboard"])
 RECENT_LIMIT = 5
 
 
-async def _build_summary(
-    db: AsyncSession, user_id: uuid.UUID
-) -> DashboardSummary:
+async def _build_summary(db: AsyncSession, user_id: uuid.UUID) -> DashboardSummary:
     """Build summary counts for a single user."""
     total_tasks_q = select(func.count()).select_from(Task).where(Task.user_id == user_id)
     completed_tasks_q = (
@@ -62,9 +60,7 @@ async def _build_summary(
     )
 
 
-async def _recent_entries(
-    db: AsyncSession, user_id: uuid.UUID
-) -> list[RecentEntry]:
+async def _recent_entries(db: AsyncSession, user_id: uuid.UUID) -> list[RecentEntry]:
     """Return the most recent entries across all categories."""
     entries: list[RecentEntry] = []
 
@@ -177,9 +173,7 @@ async def get_manager_dashboard(
     if current_user.role == "admin":
         q = select(User).where(User.role == "recruit", User.is_active.is_(True))
     else:
-        q = select(User).where(
-            User.manager_id == current_user.id, User.is_active.is_(True)
-        )
+        q = select(User).where(User.manager_id == current_user.id, User.is_active.is_(True))
 
     if recruit_id:
         q = q.where(User.id == recruit_id)
@@ -211,9 +205,7 @@ async def get_manager_dashboard(
         agg_total_feedback += s.total_feedback
         agg_total_notes += s.total_notes
 
-    agg_rate = (
-        (agg_completed_tasks / agg_total_tasks * 100) if agg_total_tasks > 0 else 0.0
-    )
+    agg_rate = (agg_completed_tasks / agg_total_tasks * 100) if agg_total_tasks > 0 else 0.0
 
     return ManagerDashboardResponse(
         recruits=recruit_summaries,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from "react";
 import {
   Typography,
   Button,
@@ -15,43 +15,39 @@ import {
   Card,
   Row,
   Col,
-} from 'antd';
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  FilterOutlined,
-} from '@ant-design/icons';
-import dayjs from 'dayjs';
-import { taskApi } from '../api/tasks';
-import type { Task, TaskCreate, TaskUpdate } from '../types/task';
-import { TaskCategory, TaskStatus, TaskPriority } from '../types/task';
+  Empty,
+} from "antd";
+import { PlusOutlined, EditOutlined, DeleteOutlined, FilterOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
+import { taskApi } from "../api/tasks";
+import type { Task, TaskCreate, TaskUpdate } from "../types/task";
+import { TaskCategory, TaskStatus, TaskPriority } from "../types/task";
 
 const { Title } = Typography;
 const { TextArea } = Input;
 const { RangePicker } = DatePicker;
 
 const categoryColors: Record<string, string> = {
-  training: 'blue',
-  documentation: 'cyan',
-  meeting: 'purple',
-  setup: 'orange',
-  development: 'green',
-  other: 'default',
+  training: "blue",
+  documentation: "cyan",
+  meeting: "purple",
+  setup: "orange",
+  development: "green",
+  other: "default",
 };
 
 const statusColors: Record<string, string> = {
-  not_started: 'default',
-  in_progress: 'processing',
-  completed: 'success',
-  on_hold: 'warning',
+  not_started: "default",
+  in_progress: "processing",
+  completed: "success",
+  on_hold: "warning",
 };
 
 const priorityColors: Record<string, string> = {
-  low: 'green',
-  medium: 'blue',
-  high: 'orange',
-  critical: 'red',
+  low: "green",
+  medium: "blue",
+  high: "orange",
+  critical: "red",
 };
 
 export default function TasksPage() {
@@ -74,14 +70,14 @@ export default function TasksPage() {
       if (filterCategory) params.category = filterCategory;
       if (filterStatus) params.status = filterStatus;
       if (filterDates) {
-        params.date_from = filterDates[0].format('YYYY-MM-DD');
-        params.date_to = filterDates[1].format('YYYY-MM-DD');
+        params.date_from = filterDates[0].format("YYYY-MM-DD");
+        params.date_to = filterDates[1].format("YYYY-MM-DD");
       }
       const data = await taskApi.list(params);
       setTasks(data.items);
       setTotal(data.total);
     } catch {
-      message.error('Failed to load tasks');
+      message.error("Failed to load tasks");
     } finally {
       setLoading(false);
     }
@@ -114,10 +110,10 @@ export default function TasksPage() {
   const handleDelete = async (id: string) => {
     try {
       await taskApi.delete(id);
-      message.success('Task deleted');
+      message.success("Task deleted");
       fetchTasks();
     } catch {
-      message.error('Failed to delete task');
+      message.error("Failed to delete task");
     }
   };
 
@@ -126,15 +122,15 @@ export default function TasksPage() {
       const values = await form.validateFields();
       const payload = {
         ...values,
-        date: values.date.format('YYYY-MM-DD'),
+        date: values.date.format("YYYY-MM-DD"),
       };
 
       if (editingTask) {
         await taskApi.update(editingTask.id, payload as TaskUpdate);
-        message.success('Task updated');
+        message.success("Task updated");
       } else {
         await taskApi.create(payload as TaskCreate);
-        message.success('Task created');
+        message.success("Task created");
       }
       setModalOpen(false);
       fetchTasks();
@@ -145,44 +141,42 @@ export default function TasksPage() {
 
   const columns = [
     {
-      title: 'Date',
-      dataIndex: 'date',
-      key: 'date',
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
       width: 110,
-      render: (d: string) => dayjs(d).format('MMM D, YYYY'),
+      render: (d: string) => dayjs(d).format("MMM D, YYYY"),
     },
     {
-      title: 'Title',
-      dataIndex: 'title',
-      key: 'title',
+      title: "Title",
+      dataIndex: "title",
+      key: "title",
       ellipsis: true,
     },
     {
-      title: 'Category',
-      dataIndex: 'category',
-      key: 'category',
+      title: "Category",
+      dataIndex: "category",
+      key: "category",
       width: 130,
-      render: (c: string) => <Tag color={categoryColors[c]}>{c.replace('_', ' ')}</Tag>,
+      render: (c: string) => <Tag color={categoryColors[c]}>{c.replace("_", " ")}</Tag>,
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
       width: 120,
-      render: (s: string) => (
-        <Tag color={statusColors[s]}>{s.replace(/_/g, ' ')}</Tag>
-      ),
+      render: (s: string) => <Tag color={statusColors[s]}>{s.replace(/_/g, " ")}</Tag>,
     },
     {
-      title: 'Priority',
-      dataIndex: 'priority',
-      key: 'priority',
+      title: "Priority",
+      dataIndex: "priority",
+      key: "priority",
       width: 100,
       render: (p: string) => <Tag color={priorityColors[p]}>{p}</Tag>,
     },
     {
-      title: 'Actions',
-      key: 'actions',
+      title: "Actions",
+      key: "actions",
       width: 120,
       render: (_: unknown, record: Task) => (
         <Space>
@@ -192,10 +186,7 @@ export default function TasksPage() {
             onClick={() => handleEdit(record)}
             size="small"
           />
-          <Popconfirm
-            title="Delete this task?"
-            onConfirm={() => handleDelete(record.id)}
-          >
+          <Popconfirm title="Delete this task?" onConfirm={() => handleDelete(record.id)}>
             <Button type="link" danger icon={<DeleteOutlined />} size="small" />
           </Popconfirm>
         </Space>
@@ -205,8 +196,17 @@ export default function TasksPage() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Title level={2} style={{ margin: 0 }}>Tasks</Title>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 16,
+        }}
+      >
+        <Title level={2} style={{ margin: 0 }}>
+          Tasks
+        </Title>
         <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
           New Task
         </Button>
@@ -225,7 +225,7 @@ export default function TasksPage() {
               value={filterCategory}
               onChange={setFilterCategory}
               options={Object.values(TaskCategory).map((c) => ({
-                label: c.replace('_', ' '),
+                label: c.replace("_", " "),
                 value: c,
               }))}
             />
@@ -238,7 +238,7 @@ export default function TasksPage() {
               value={filterStatus}
               onChange={setFilterStatus}
               options={Object.values(TaskStatus).map((s) => ({
-                label: s.replace(/_/g, ' '),
+                label: s.replace(/_/g, " "),
                 value: s,
               }))}
             />
@@ -246,9 +246,7 @@ export default function TasksPage() {
           <Col>
             <RangePicker
               value={filterDates}
-              onChange={(dates) =>
-                setFilterDates(dates as [dayjs.Dayjs, dayjs.Dayjs] | null)
-              }
+              onChange={(dates) => setFilterDates(dates as [dayjs.Dayjs, dayjs.Dayjs] | null)}
             />
           </Col>
         </Row>
@@ -259,6 +257,14 @@ export default function TasksPage() {
         dataSource={tasks}
         rowKey="id"
         loading={loading}
+        locale={{
+          emptyText: (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="No tasks yet. Click 'New Task' to get started."
+            />
+          ),
+        }}
         pagination={{
           current: page,
           pageSize: perPage,
@@ -269,24 +275,24 @@ export default function TasksPage() {
       />
 
       <Modal
-        title={editingTask ? 'Edit Task' : 'New Task'}
+        title={editingTask ? "Edit Task" : "New Task"}
         open={modalOpen}
         onOk={handleSubmit}
         onCancel={() => setModalOpen(false)}
-        okText={editingTask ? 'Update' : 'Create'}
+        okText={editingTask ? "Update" : "Create"}
         width={600}
       >
         <Form form={form} layout="vertical">
           <Form.Item name="date" label="Date" rules={[{ required: true }]}>
-            <DatePicker style={{ width: '100%' }} />
+            <DatePicker style={{ width: "100%" }} />
           </Form.Item>
           <Form.Item
             name="title"
             label="Title"
             rules={[
-              { required: true, message: 'Title is required' },
-              { min: 3, message: 'Title must be at least 3 characters' },
-              { max: 200, message: 'Title must be at most 200 characters' },
+              { required: true, message: "Title is required" },
+              { min: 3, message: "Title must be at least 3 characters" },
+              { max: 200, message: "Title must be at most 200 characters" },
             ]}
           >
             <Input />
@@ -297,7 +303,7 @@ export default function TasksPage() {
           <Form.Item name="category" label="Category" rules={[{ required: true }]}>
             <Select
               options={Object.values(TaskCategory).map((c) => ({
-                label: c.replace('_', ' '),
+                label: c.replace("_", " "),
                 value: c,
               }))}
             />
@@ -307,7 +313,7 @@ export default function TasksPage() {
               <Form.Item name="status" label="Status" rules={[{ required: true }]}>
                 <Select
                   options={Object.values(TaskStatus).map((s) => ({
-                    label: s.replace(/_/g, ' '),
+                    label: s.replace(/_/g, " "),
                     value: s,
                   }))}
                 />

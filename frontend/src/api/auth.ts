@@ -1,10 +1,5 @@
 import apiClient from "./client";
-import type {
-  LoginRequest,
-  RegisterRequest,
-  TokenResponse,
-  User,
-} from "../types/auth";
+import type { LoginRequest, RegisterRequest, TokenResponse, User } from "../types/auth";
 
 export const authApi = {
   register: async (data: RegisterRequest): Promise<User> => {
@@ -23,7 +18,7 @@ export const authApi = {
   },
 
   updateMe: async (
-    data: Partial<Pick<User, "full_name" | "department" | "start_date">>
+    data: Partial<Pick<User, "full_name" | "department" | "start_date">>,
   ): Promise<User> => {
     const response = await apiClient.put<User>("/auth/me", data);
     return response.data;

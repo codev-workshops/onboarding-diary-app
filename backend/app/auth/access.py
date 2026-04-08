@@ -15,9 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.user import User
 
 
-async def get_accessible_user_ids(
-    current_user: User, db: AsyncSession
-) -> list[uuid.UUID] | None:
+async def get_accessible_user_ids(current_user: User, db: AsyncSession) -> list[uuid.UUID] | None:
     """Return a list of user IDs that the current user can access, or None for all."""
     if current_user.role == "admin":
         return None  # admin can see everything
@@ -25,9 +23,7 @@ async def get_accessible_user_ids(
     ids = [current_user.id]
 
     if current_user.role == "manager":
-        result = await db.execute(
-            select(User.id).where(User.manager_id == current_user.id)
-        )
+        result = await db.execute(select(User.id).where(User.manager_id == current_user.id))
         recruit_ids = result.scalars().all()
         ids.extend(recruit_ids)
 

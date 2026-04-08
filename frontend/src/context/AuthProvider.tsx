@@ -1,29 +1,20 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-  type ReactNode,
-} from "react";
+import { useState, useCallback, useSyncExternalStore, type ReactNode } from "react";
 import { authApi } from "../api/auth";
 import type { User, LoginRequest, RegisterRequest } from "../types/auth";
+import { AuthContext } from "./AuthContext";
 
-interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (data: LoginRequest) => Promise<void>;
-  register: (data: RegisterRequest) => Promise<void>;
-  logout: () => void;
-  refreshUser: () => Promise<void>;
+function useInitialAuth() {
+  const hasToken = useSyncExternalStore(
+    () => () => {},
+    () => !!localStorage.getItem("access_token"),
+  );
+  return hasToken;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const hasToken = useInitialAuth();
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(hasToken);
 
   const refreshUser = useCallback(async () => {
     try {
@@ -34,17 +25,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       localStorage.removeItem("access_token");
       localStorage.removeItem("user");
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      refreshUser().finally(() => setIsLoading(false));
-    } else {
-      setIsLoading(false);
+  // Initialize user on mount if token exists
+  useState(() => {
+    if (hasToken) {
+      refreshUser();
     }
-  }, [refreshUser]);
+  });
 
   const login = async (data: LoginRequest) => {
     const response = await authApi.login(data);
@@ -78,12 +69,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth(): AuthContextType {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
 }

@@ -1,22 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Card,
-  Form,
-  Input,
-  Button,
-  Typography,
-  DatePicker,
-  message,
-  Space,
-} from "antd";
-import {
-  MailOutlined,
-  LockOutlined,
-  UserOutlined,
-  BankOutlined,
-} from "@ant-design/icons";
-import { useAuth } from "../context/AuthContext";
+import { Card, Form, Input, Button, Typography, DatePicker, message, Space } from "antd";
+import { MailOutlined, LockOutlined, UserOutlined, BankOutlined } from "@ant-design/icons";
+import { useAuth } from "../context/useAuth";
 import type { RegisterRequest } from "../types/auth";
 import type { Dayjs } from "dayjs";
 
@@ -44,9 +30,7 @@ export default function RegisterPage() {
         password: values.password,
         full_name: values.full_name,
         department: values.department || undefined,
-        start_date: values.start_date
-          ? values.start_date.format("YYYY-MM-DD")
-          : undefined,
+        start_date: values.start_date ? values.start_date.format("YYYY-MM-DD") : undefined,
       };
       await register(payload);
       message.success("Registration successful! Please sign in.");
@@ -84,18 +68,10 @@ export default function RegisterPage() {
           <Title level={2} style={{ margin: 0 }}>
             Create Account
           </Title>
-          <Text type="secondary">
-            Start documenting your onboarding journey
-          </Text>
+          <Text type="secondary">Start documenting your onboarding journey</Text>
         </Space>
 
-        <Form
-          name="register"
-          layout="vertical"
-          onFinish={onFinish}
-          autoComplete="off"
-          size="large"
-        >
+        <Form name="register" layout="vertical" onFinish={onFinish} autoComplete="off" size="large">
           <Form.Item
             name="full_name"
             label="Full Name"
@@ -167,17 +143,11 @@ export default function RegisterPage() {
               }),
             ]}
           >
-            <Input.Password
-              prefix={<LockOutlined />}
-              placeholder="Re-enter password"
-            />
+            <Input.Password prefix={<LockOutlined />} placeholder="Re-enter password" />
           </Form.Item>
 
           <Form.Item name="department" label="Department">
-            <Input
-              prefix={<BankOutlined />}
-              placeholder="e.g. Engineering"
-            />
+            <Input prefix={<BankOutlined />} placeholder="e.g. Engineering" />
           </Form.Item>
 
           <Form.Item name="start_date" label="Start Date">

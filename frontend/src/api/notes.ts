@@ -1,5 +1,5 @@
-import apiClient from './client';
-import type { Note, NoteCreate, NoteUpdate, PaginatedNoteResponse } from '../types/note';
+import apiClient from "./client";
+import type { Note, NoteCreate, NoteUpdate, PaginatedNoteResponse } from "../types/note";
 
 interface NoteListParams {
   date_from?: string;
@@ -11,12 +11,12 @@ interface NoteListParams {
 
 export const noteApi = {
   create: async (data: NoteCreate): Promise<Note> => {
-    const response = await apiClient.post<Note>('/notes/', data);
+    const response = await apiClient.post<Note>("/notes/", data);
     return response.data;
   },
 
   list: async (params?: NoteListParams): Promise<PaginatedNoteResponse> => {
-    const response = await apiClient.get<PaginatedNoteResponse>('/notes/', { params });
+    const response = await apiClient.get<PaginatedNoteResponse>("/notes/", { params });
     return response.data;
   },
 

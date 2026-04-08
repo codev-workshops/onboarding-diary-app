@@ -1,6 +1,5 @@
-import uuid
 import datetime as _dt
-from typing import Optional
+import uuid
 
 from pydantic import BaseModel
 
@@ -19,7 +18,7 @@ class RecentEntry(BaseModel):
     entry_type: str
     title: str
     date: _dt.date
-    status: Optional[str] = None
+    status: str | None = None
     created_at: _dt.datetime
 
 
@@ -32,7 +31,7 @@ class RecruitSummary(BaseModel):
     user_id: uuid.UUID
     full_name: str
     email: str
-    department: Optional[str]
+    department: str | None
     summary: DashboardSummary
 
 

@@ -1,6 +1,17 @@
-import { BrowserRouter, Routes, Route, Navigate, Link, useLocation } from "react-router-dom";
-import { ConfigProvider, Layout, Typography, Spin } from "antd";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { ConfigProvider, Layout, Menu, Spin, Typography, theme } from "antd";
+import {
+  DashboardOutlined,
+  CheckSquareOutlined,
+  ExclamationCircleOutlined,
+  MessageOutlined,
+  FileTextOutlined,
+  BarChartOutlined,
+  LogoutOutlined,
+} from "@ant-design/icons";
+import { AuthProvider } from "./context/AuthProvider";
+import { useAuth } from "./context/useAuth";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -11,58 +22,108 @@ import NotesPage from "./pages/NotesPage";
 import ReportsPage from "./pages/ReportsPage";
 import type { ReactNode } from "react";
 
-const { Header, Content, Footer } = Layout;
+const { Content, Sider, Footer } = Layout;
 const { Title } = Typography;
 
-const Placeholder = ({ name }: { name: string }) => (
-  <div style={{ padding: 24 }}>
-    <Title level={3}>{name}</Title>
-    <p>This page is under construction.</p>
-  </div>
-);
-
-function NavBar() {
-  const { isAuthenticated } = useAuth();
+function Sidebar() {
+  const { isAuthenticated, user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [collapsed, setCollapsed] = useState(false);
 
   if (!isAuthenticated) return null;
 
-  const items = [
-    { key: "/dashboard", label: "Dashboard" },
-    { key: "/tasks", label: "Tasks" },
-    { key: "/issues", label: "Issues" },
-    { key: "/feedback", label: "Feedback" },
-    { key: "/notes", label: "Notes" },
-    { key: "/reports", label: "Reports" },
+  const menuItems = [
+    { key: "/dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
+    { key: "/tasks", icon: <CheckSquareOutlined />, label: "Tasks" },
+    { key: "/issues", icon: <ExclamationCircleOutlined />, label: "Issues" },
+    { key: "/feedback", icon: <MessageOutlined />, label: "Feedback" },
+    { key: "/notes", icon: <FileTextOutlined />, label: "Notes" },
+    { key: "/reports", icon: <BarChartOutlined />, label: "Reports" },
   ];
 
+  const handleMenuClick = ({ key }: { key: string }) => {
+    if (key === "logout") {
+      logout();
+      navigate("/login");
+    } else {
+      navigate(key);
+    }
+  };
+
   return (
-    <div
+    <Sider
+      collapsible
+      collapsed={collapsed}
+      onCollapse={setCollapsed}
+      breakpoint="md"
+      collapsedWidth={80}
       style={{
-        display: "flex",
-        gap: 16,
-        alignItems: "center",
-        marginLeft: 32,
-        flex: 1,
+        overflow: "auto",
+        height: "100vh",
+        position: "sticky",
+        top: 0,
+        left: 0,
       }}
     >
-      {items.map((item) => (
-        <Link
-          key={item.key}
-          to={item.key}
+      <div
+        style={{
+          height: 64,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
+        }}
+      >
+        <Title
+          level={4}
           style={{
-            color:
-              location.pathname === item.key
-                ? "#1677ff"
-                : "rgba(255,255,255,0.65)",
-            textDecoration: "none",
-            fontSize: 14,
+            color: "#fff",
+            margin: 0,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
           }}
         >
-          {item.label}
-        </Link>
-      ))}
-    </div>
+          {collapsed ? "OD" : "Onboarding Diary"}
+        </Title>
+      </div>
+
+      {!collapsed && user && (
+        <div
+          style={{
+            padding: "12px 16px",
+            color: "rgba(255,255,255,0.65)",
+            fontSize: 12,
+            borderBottom: "1px solid rgba(255,255,255,0.1)",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {user.full_name}
+        </div>
+      )}
+
+      <Menu
+        theme="dark"
+        mode="inline"
+        selectedKeys={[location.pathname]}
+        items={menuItems}
+        onClick={handleMenuClick}
+        style={{ borderRight: 0 }}
+      />
+
+      <div style={{ position: "absolute", bottom: 48, width: "100%" }}>
+        <Menu
+          theme="dark"
+          mode="inline"
+          selectable={false}
+          items={[{ key: "logout", icon: <LogoutOutlined />, label: "Logout" }]}
+          onClick={handleMenuClick}
+          style={{ borderRight: 0 }}
+        />
+      </div>
+    </Sider>
   );
 }
 
@@ -102,83 +163,97 @@ function PublicRoute({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-function AppRoutes() {
+function AppLayout() {
+  const { isAuthenticated } = useAuth();
+  const {
+    token: { colorBgContainer },
+  } = theme.useToken();
+
   return (
-    <Routes>
-      <Route
-        path="/login"
-        element={
-          <PublicRoute>
-            <LoginPage />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/register"
-        element={
-          <PublicRoute>
-            <RegisterPage />
-          </PublicRoute>
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/tasks"
-        element={
-          <ProtectedRoute>
-            <TasksPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/issues"
-        element={
-          <ProtectedRoute>
-            <IssuesPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/feedback"
-        element={
-          <ProtectedRoute>
-            <FeedbackPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/notes"
-        element={
-          <ProtectedRoute>
-            <NotesPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/reports"
-        element={
-          <ProtectedRoute>
-            <ReportsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <Placeholder name="Profile" />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="/" element={<Navigate to="/login" replace />} />
-    </Routes>
+    <Layout style={{ minHeight: "100vh" }}>
+      <Sidebar />
+      <Layout>
+        <Content
+          style={{
+            padding: isAuthenticated ? "24px" : 0,
+            flex: 1,
+            overflow: "auto",
+            background: colorBgContainer,
+          }}
+        >
+          <Routes>
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <LoginPage />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <PublicRoute>
+                  <RegisterPage />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tasks"
+              element={
+                <ProtectedRoute>
+                  <TasksPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/issues"
+              element={
+                <ProtectedRoute>
+                  <IssuesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/feedback"
+              element={
+                <ProtectedRoute>
+                  <FeedbackPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/notes"
+              element={
+                <ProtectedRoute>
+                  <NotesPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute>
+                  <ReportsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </Content>
+        <Footer style={{ textAlign: "center" }}>
+          Onboarding Diary &copy; {new Date().getFullYear()}
+        </Footer>
+      </Layout>
+    </Layout>
   );
 }
 
@@ -193,28 +268,7 @@ function App() {
     >
       <BrowserRouter>
         <AuthProvider>
-          <Layout style={{ minHeight: "100vh" }}>
-            <Header
-              style={{
-                display: "flex",
-                alignItems: "center",
-                background: "#001529",
-              }}
-            >
-              <Title level={3} style={{ color: "#fff", margin: 0 }}>
-                Onboarding Diary
-              </Title>
-              <NavBar />
-            </Header>
-
-            <Content style={{ padding: "24px 48px", flex: 1 }}>
-              <AppRoutes />
-            </Content>
-
-            <Footer style={{ textAlign: "center" }}>
-              Onboarding Diary &copy; {new Date().getFullYear()}
-            </Footer>
-          </Layout>
+          <AppLayout />
         </AuthProvider>
       </BrowserRouter>
     </ConfigProvider>

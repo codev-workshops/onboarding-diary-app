@@ -1,8 +1,5 @@
 import apiClient from "./client";
-import type {
-  DashboardResponse,
-  ManagerDashboardResponse,
-} from "../types/dashboard";
+import type { DashboardResponse, ManagerDashboardResponse } from "../types/dashboard";
 
 export const dashboardApi = {
   getDashboard: async (): Promise<DashboardResponse> => {
@@ -10,14 +7,11 @@ export const dashboardApi = {
     return response.data;
   },
 
-  getManagerDashboard: async (
-    recruitId?: string
-  ): Promise<ManagerDashboardResponse> => {
+  getManagerDashboard: async (recruitId?: string): Promise<ManagerDashboardResponse> => {
     const params = recruitId ? { recruit_id: recruitId } : {};
-    const response = await apiClient.get<ManagerDashboardResponse>(
-      "/dashboard/manager",
-      { params }
-    );
+    const response = await apiClient.get<ManagerDashboardResponse>("/dashboard/manager", {
+      params,
+    });
     return response.data;
   },
 };

@@ -11,9 +11,7 @@ from app.database import Base
 class Feedback(Base):
     __tablename__ = "feedback"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
@@ -22,9 +20,7 @@ class Feedback(Base):
     )
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
     subject: Mapped[str] = mapped_column(String(200), nullable=False)
-    feedback_type: Mapped[str] = mapped_column(
-        "type", String(20), nullable=False, index=True
-    )
+    feedback_type: Mapped[str] = mapped_column("type", String(20), nullable=False, index=True)
     details: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()

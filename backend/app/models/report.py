@@ -11,9 +11,7 @@ from app.database import Base
 class Report(Base):
     __tablename__ = "reports"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     generated_by: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id"),
@@ -35,9 +33,5 @@ class Report(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
 
-    generator = relationship(
-        "User", foreign_keys=[generated_by], lazy="selectin"
-    )
-    target_user = relationship(
-        "User", foreign_keys=[target_user_id], lazy="selectin"
-    )
+    generator = relationship("User", foreign_keys=[generated_by], lazy="selectin")
+    target_user = relationship("User", foreign_keys=[target_user_id], lazy="selectin")
