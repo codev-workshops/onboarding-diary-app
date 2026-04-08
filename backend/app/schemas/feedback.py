@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime
+import datetime as _dt
 from enum import Enum
 from typing import Optional
 
@@ -13,7 +13,7 @@ class FeedbackType(str, Enum):
 
 
 class FeedbackCreate(BaseModel):
-    date: date
+    date: _dt.date
     subject: str = Field(min_length=3, max_length=200)
     feedback_type: FeedbackType = Field(alias="type")
     details: str = Field(min_length=10, max_length=5000)
@@ -22,7 +22,7 @@ class FeedbackCreate(BaseModel):
 
 
 class FeedbackUpdate(BaseModel):
-    date: Optional[date] = None
+    date: Optional[_dt.date] = None
     subject: Optional[str] = Field(default=None, min_length=3, max_length=200)
     feedback_type: Optional[FeedbackType] = Field(default=None, alias="type")
     details: Optional[str] = Field(default=None, min_length=10, max_length=5000)
@@ -33,12 +33,12 @@ class FeedbackUpdate(BaseModel):
 class FeedbackResponse(BaseModel):
     id: uuid.UUID
     user_id: uuid.UUID
-    date: date
+    date: _dt.date
     subject: str
     type: str = Field(validation_alias="feedback_type")
     details: str
-    created_at: datetime
-    updated_at: datetime
+    created_at: _dt.datetime
+    updated_at: _dt.datetime
 
     model_config = {"from_attributes": True, "populate_by_name": True}
 

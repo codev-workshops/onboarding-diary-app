@@ -1,12 +1,12 @@
 import uuid
-from datetime import date, datetime
+import datetime as _dt
 from typing import Optional
 
 from pydantic import BaseModel, Field, field_validator
 
 
 class NoteCreate(BaseModel):
-    date: date
+    date: _dt.date
     title: str = Field(min_length=3, max_length=200)
     content: str = Field(min_length=1, max_length=10000)
     tags: list[str] = Field(default_factory=list, max_length=10)
@@ -27,7 +27,7 @@ class NoteCreate(BaseModel):
 
 
 class NoteUpdate(BaseModel):
-    date: Optional[date] = None
+    date: Optional[_dt.date] = None
     title: Optional[str] = Field(default=None, min_length=3, max_length=200)
     content: Optional[str] = Field(default=None, min_length=1, max_length=10000)
     tags: Optional[list[str]] = Field(default=None, max_length=10)
@@ -52,12 +52,12 @@ class NoteUpdate(BaseModel):
 class NoteResponse(BaseModel):
     id: uuid.UUID
     user_id: uuid.UUID
-    date: date
+    date: _dt.date
     title: str
     content: str
     tags: list[str]
-    created_at: datetime
-    updated_at: datetime
+    created_at: _dt.datetime
+    updated_at: _dt.datetime
 
     model_config = {"from_attributes": True}
 

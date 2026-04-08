@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, datetime
+import datetime as _dt
 from enum import Enum
 from typing import Optional
 
@@ -21,7 +21,7 @@ class IssueStatus(str, Enum):
 
 
 class IssueCreate(BaseModel):
-    date: date
+    date: _dt.date
     title: str = Field(min_length=3, max_length=200)
     description: str = Field(min_length=10, max_length=5000)
     severity: IssueSeverity
@@ -39,7 +39,7 @@ class IssueCreate(BaseModel):
 
 
 class IssueUpdate(BaseModel):
-    date: Optional[date] = None
+    date: Optional[_dt.date] = None
     title: Optional[str] = Field(default=None, min_length=3, max_length=200)
     description: Optional[str] = Field(default=None, min_length=10, max_length=5000)
     severity: Optional[IssueSeverity] = None
@@ -50,14 +50,14 @@ class IssueUpdate(BaseModel):
 class IssueResponse(BaseModel):
     id: uuid.UUID
     user_id: uuid.UUID
-    date: date
+    date: _dt.date
     title: str
     description: str
     severity: str
     status: str
     resolution_notes: Optional[str]
-    created_at: datetime
-    updated_at: datetime
+    created_at: _dt.datetime
+    updated_at: _dt.datetime
 
     model_config = {"from_attributes": True}
 
