@@ -106,18 +106,43 @@ export async function updateTemplate(templateId: string, input: UpdateTemplateIn
       throw new ValidationError([{ field: "items", message: "At least one checklist item is required" }]);
     }
 
-    // Delete old items and recreate
-    await prisma.checklistTemplateItem.deleteMany({
+    // Use upsert strategy to preserve recruit progress (avoid cascade-deleting recruit_checklist_items)
+    const existingItems = await prisma.checklistTemplateItem.findMany({
       where: { templateId },
+      orderBy: { sortOrder: "asc" },
     });
 
-    await prisma.checklistTemplateItem.createMany({
-      data: input.items.map((label, index) => ({
-        templateId,
-        label: label.trim(),
-        sortOrder: index,
-      })),
-    });
+    const newItems = input.items.map((label) => label.trim());
+
+    // Update existing items in-place, preserving their IDs
+    const itemsToKeep: string[] = [];
+    for (let i = 0; i < newItems.length; i++) {
+      if (i < existingItems.length) {
+        // Update existing item
+        await prisma.checklistTemplateItem.update({
+          where: { id: existingItems[i].id },
+          data: { label: newItems[i], sortOrder: i },
+        });
+        itemsToKeep.push(existingItems[i].id);
+      } else {
+        // Create new item
+        const created = await prisma.checklistTemplateItem.create({
+          data: { templateId, label: newItems[i], sortOrder: i },
+        });
+        itemsToKeep.push(created.id);
+      }
+    }
+
+    // Delete only items that are no longer in the new list
+    const idsToDelete = existingItems
+      .filter((item) => !itemsToKeep.includes(item.id))
+      .map((item) => item.id);
+
+    if (idsToDelete.length > 0) {
+      await prisma.checklistTemplateItem.deleteMany({
+        where: { id: { in: idsToDelete } },
+      });
+    }
   }
 
   const template = await prisma.checklistTemplate.update({

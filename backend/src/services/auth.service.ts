@@ -10,13 +10,11 @@ import {
   UnauthorizedError,
   NotFoundError,
 } from "../utils";
-import { Role } from "@prisma/client";
 
 interface RegisterInput {
   email: string;
   password: string;
   fullName: string;
-  role?: Role;
   department?: string;
   startDate?: string;
 }
@@ -53,7 +51,7 @@ export async function register(input: RegisterInput) {
       email: input.email.toLowerCase().trim(),
       passwordHash,
       fullName: input.fullName.trim(),
-      role: input.role || "recruit",
+      role: "recruit",
       department: input.department?.trim() || null,
       startDate: input.startDate ? new Date(input.startDate) : null,
     },
@@ -148,9 +146,9 @@ export async function updateProfile(
     where: { id: userId },
     data: {
       ...(data.fullName !== undefined && { fullName: data.fullName.trim() }),
-      ...(data.department !== undefined && { department: data.department.trim() }),
+      ...(data.department !== undefined && { department: data.department?.trim() || null }),
       ...(data.startDate !== undefined && {
-        startDate: new Date(data.startDate),
+        startDate: data.startDate ? new Date(data.startDate) : null,
       }),
     },
     select: userSelectFields,

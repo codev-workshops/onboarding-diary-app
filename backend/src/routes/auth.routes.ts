@@ -49,16 +49,6 @@ router.post(
       ],
     },
     {
-      field: "role",
-      value: body.role,
-      rules: [
-        {
-          check: isOptional(isOneOf(["recruit", "manager", "admin"])),
-          message: "Role must be one of: recruit, manager, admin",
-        },
-      ],
-    },
-    {
       field: "department",
       value: body.department,
       rules: [
