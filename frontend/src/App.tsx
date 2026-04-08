@@ -4,6 +4,10 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
+import TasksPage from "./pages/TasksPage";
+import IssuesPage from "./pages/IssuesPage";
+import FeedbackPage from "./pages/FeedbackPage";
+import NotesPage from "./pages/NotesPage";
 import type { ReactNode } from "react";
 
 const { Header, Content, Footer } = Layout;
@@ -83,7 +87,7 @@ function AppRoutes() {
         path="/tasks"
         element={
           <ProtectedRoute>
-            <Placeholder name="Tasks" />
+            <TasksPage />
           </ProtectedRoute>
         }
       />
@@ -91,7 +95,7 @@ function AppRoutes() {
         path="/issues"
         element={
           <ProtectedRoute>
-            <Placeholder name="Issues" />
+            <IssuesPage />
           </ProtectedRoute>
         }
       />
@@ -99,7 +103,7 @@ function AppRoutes() {
         path="/feedback"
         element={
           <ProtectedRoute>
-            <Placeholder name="Feedback" />
+            <FeedbackPage />
           </ProtectedRoute>
         }
       />
@@ -107,7 +111,7 @@ function AppRoutes() {
         path="/notes"
         element={
           <ProtectedRoute>
-            <Placeholder name="Notes" />
+            <NotesPage />
           </ProtectedRoute>
         }
       />

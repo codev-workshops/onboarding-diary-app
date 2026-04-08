@@ -10,6 +10,10 @@ from app.database import Base
 
 # Import all models here so Alembic can detect them
 from app.models import user  # noqa: F401
+from app.models import task  # noqa: F401
+from app.models import issue  # noqa: F401
+from app.models import feedback  # noqa: F401
+from app.models import note  # noqa: F401
 
 config = context.config
 
