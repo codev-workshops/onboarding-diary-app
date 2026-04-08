@@ -9,7 +9,7 @@ from app.config import settings
 from app.database import Base
 
 # Import all models here so Alembic can detect them
-# from app.models import user, task, issue, feedback, note, report  # noqa: F401
+from app.models import user  # noqa: F401
 
 config = context.config
 
