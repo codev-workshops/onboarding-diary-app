@@ -4,6 +4,8 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import ProfilePage from "./pages/ProfilePage";
+import TasksPage from "./pages/TasksPage";
+import IssuesPage from "./pages/IssuesPage";
 import PlaceholderPage from "./pages/PlaceholderPage";
 
 function App() {
@@ -17,8 +19,8 @@ function App() {
         {/* Protected routes */}
         <Route element={<AppLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/tasks" element={<PlaceholderPage title="Tasks" />} />
-          <Route path="/issues" element={<PlaceholderPage title="Issues" />} />
+          <Route path="/tasks" element={<TasksPage />} />
+          <Route path="/issues" element={<IssuesPage />} />
           <Route path="/feedback" element={<PlaceholderPage title="Feedback" />} />
           <Route path="/notes" element={<PlaceholderPage title="Notes" />} />
           <Route path="/reports" element={<PlaceholderPage title="Reports" />} />
