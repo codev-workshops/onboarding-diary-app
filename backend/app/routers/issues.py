@@ -130,10 +130,10 @@ async def update_issue(
         issue.title = update_data["title"]
     if "description" in update_data:
         issue.description = update_data["description"]
-    if "severity" in update_data:
-        issue.severity = update_data["severity"].value if update_data["severity"] else None
-    if "status" in update_data:
-        issue.status = update_data["status"].value if update_data["status"] else None
+    if "severity" in update_data and update_data["severity"] is not None:
+        issue.severity = update_data["severity"].value
+    if "status" in update_data and update_data["status"] is not None:
+        issue.status = update_data["status"].value
     if "resolution_notes" in update_data:
         issue.resolution_notes = update_data["resolution_notes"]
 

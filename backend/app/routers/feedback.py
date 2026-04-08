@@ -122,8 +122,8 @@ async def update_feedback(
         fb.date = update_data["date"]
     if "subject" in update_data:
         fb.subject = update_data["subject"]
-    if "feedback_type" in update_data:
-        fb.feedback_type = update_data["feedback_type"].value if update_data["feedback_type"] else None
+    if "feedback_type" in update_data and update_data["feedback_type"] is not None:
+        fb.feedback_type = update_data["feedback_type"].value
     if "details" in update_data:
         fb.details = update_data["details"]
 

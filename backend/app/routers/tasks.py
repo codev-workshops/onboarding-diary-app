@@ -130,12 +130,12 @@ async def update_task(
         task.title = update_data["title"]
     if "description" in update_data:
         task.description = update_data["description"]
-    if "category" in update_data:
-        task.category = update_data["category"].value if update_data["category"] else None
-    if "status" in update_data:
-        task.status = update_data["status"].value if update_data["status"] else None
-    if "priority" in update_data:
-        task.priority = update_data["priority"].value if update_data["priority"] else None
+    if "category" in update_data and update_data["category"] is not None:
+        task.category = update_data["category"].value
+    if "status" in update_data and update_data["status"] is not None:
+        task.status = update_data["status"].value
+    if "priority" in update_data and update_data["priority"] is not None:
+        task.priority = update_data["priority"].value
 
     await db.flush()
     await db.refresh(task)
