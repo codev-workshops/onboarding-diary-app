@@ -8,9 +8,14 @@ import type {
   Feedback,
   Note,
   PaginatedResponse,
+  AnalyticsData,
 } from "../types";
 import * as managerService from "../services/manager.service";
+import * as analyticsService from "../services/analytics.service";
 import Pagination from "../components/ui/Pagination";
+import TasksOverTimeChart from "../components/charts/TasksOverTimeChart";
+import IssuesBySeverityChart from "../components/charts/IssuesBySeverityChart";
+import FeedbackSentimentChart from "../components/charts/FeedbackSentimentChart";
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("en-US", {
@@ -50,6 +55,9 @@ export default function ManagerPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Analytics
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+
   // Recruit detail view
   const [selectedRecruitId, setSelectedRecruitId] = useState<string | null>(null);
   const [selectedRecruitName, setSelectedRecruitName] = useState("");
@@ -66,8 +74,12 @@ export default function ManagerPage() {
   useEffect(() => {
     async function fetchDashboard() {
       try {
-        const result = await managerService.getManagerDashboard();
-        setDashboard(result);
+        const [dashResult, analyticsResult] = await Promise.all([
+          managerService.getManagerDashboard(),
+          analyticsService.getManagerAnalytics(),
+        ]);
+        setDashboard(dashResult);
+        setAnalytics(analyticsResult);
       } catch (err) {
         const axiosErr = err as AxiosError<ApiErrorResponse>;
         setError(axiosErr.response?.data?.error?.message || "Failed to load manager dashboard");
@@ -311,6 +323,27 @@ export default function ManagerPage() {
           </p>
         </div>
       </div>
+
+      {/* Analytics Charts */}
+      {analytics && (
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Analytics</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <h3 className="font-medium text-gray-900 mb-3">Tasks Over Time (30 days)</h3>
+              <TasksOverTimeChart data={analytics.tasksOverTime} />
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <h3 className="font-medium text-gray-900 mb-3">Issues by Severity</h3>
+              <IssuesBySeverityChart data={analytics.issuesBySeverity} />
+            </div>
+            <div className="bg-white rounded-xl border border-gray-200 p-4">
+              <h3 className="font-medium text-gray-900 mb-3">Feedback Sentiment</h3>
+              <FeedbackSentimentChart data={analytics.feedbackSentiment} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Recruit List */}
       <h2 className="text-lg font-semibold text-gray-900 mb-4">Recruits</h2>

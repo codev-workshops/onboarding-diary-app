@@ -7,3 +7,5 @@ export * as dashboardService from "./dashboard.service";
 export * as reportService from "./report.service";
 export * as managerService from "./manager.service";
 export * as adminService from "./admin.service";
+export * as checklistService from "./checklist.service";
+export * as analyticsService from "./analytics.service";

@@ -1,8 +1,13 @@
 import api from "./api";
-import type { ManagerDashboardData, PaginatedResponse, Task, Issue, Feedback, Note } from "../types";
+import type { ManagerDashboardData, PaginatedResponse, Task, Issue, Feedback, Note, RecruitListItem } from "../types";
 
 export async function getManagerDashboard(): Promise<ManagerDashboardData> {
   const { data } = await api.get<ManagerDashboardData>("/manager/dashboard");
+  return data;
+}
+
+export async function getRecruitList(): Promise<RecruitListItem[]> {
+  const { data } = await api.get<RecruitListItem[]>("/manager/recruits");
   return data;
 }
 

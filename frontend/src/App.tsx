@@ -11,6 +11,7 @@ import NotesPage from "./pages/NotesPage";
 import ReportsPage from "./pages/ReportsPage";
 import ManagerPage from "./pages/ManagerPage";
 import AdminPage from "./pages/AdminPage";
+import ChecklistPage from "./pages/ChecklistPage";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="/issues" element={<IssuesPage />} />
           <Route path="/feedback" element={<FeedbackPage />} />
           <Route path="/notes" element={<NotesPage />} />
+          <Route path="/checklists" element={<ChecklistPage />} />
           <Route path="/reports" element={<ReportsPage />} />
           <Route path="/manager" element={<ManagerPage />} />
           <Route path="/admin" element={<AdminPage />} />

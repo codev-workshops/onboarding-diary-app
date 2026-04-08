@@ -8,6 +8,8 @@ import dashboardRoutes from "./dashboard.routes";
 import reportRoutes from "./report.routes";
 import managerRoutes from "./manager.routes";
 import adminRoutes from "./admin.routes";
+import checklistRoutes from "./checklist.routes";
+import analyticsRoutes from "./analytics.routes";
 
 const router = Router();
 
@@ -20,5 +22,7 @@ router.use("/dashboard", dashboardRoutes);
 router.use("/reports", reportRoutes);
 router.use("/manager", managerRoutes);
 router.use("/admin", adminRoutes);
+router.use("/checklists", checklistRoutes);
+router.use("/analytics", analyticsRoutes);
 
 export default router;

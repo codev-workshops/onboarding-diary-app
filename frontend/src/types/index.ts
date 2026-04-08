@@ -252,6 +252,87 @@ export type ManagerOption = {
   email: string;
 };
 
+// Checklist types
+export type ChecklistTemplateItem = {
+  id: string;
+  label: string;
+  sortOrder: number;
+};
+
+export type ChecklistTemplate = {
+  id: string;
+  title: string;
+  description: string | null;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  creator: { id: string; fullName: string };
+  items: ChecklistTemplateItem[];
+  assignments?: Array<{
+    id: string;
+    recruitId: string;
+    recruit: { id: string; fullName: string; email: string };
+    createdAt: string;
+  }>;
+};
+
+export type RecruitChecklistItem = {
+  id: string;
+  isCompleted: boolean;
+  completedAt: string | null;
+  templateItem: ChecklistTemplateItem;
+};
+
+export type RecruitChecklist = {
+  id: string;
+  createdAt: string;
+  template: {
+    id: string;
+    title: string;
+    description: string | null;
+  };
+  items: RecruitChecklistItem[];
+  totalItems: number;
+  completedItems: number;
+  progressPercent: number;
+};
+
+export type ChecklistProgress = {
+  totalChecklists: number;
+  totalItems: number;
+  completedItems: number;
+  overallPercent: number;
+  checklists: Array<{
+    title: string;
+    total: number;
+    completed: number;
+    percent: number;
+  }>;
+};
+
+// Analytics types
+export type TaskOverTimePoint = {
+  date: string;
+  total: number;
+  completed: number;
+};
+
+export type SeverityCount = {
+  severity: string;
+  count: number;
+};
+
+export type SentimentCount = {
+  type: string;
+  count: number;
+};
+
+export type AnalyticsData = {
+  tasksOverTime: TaskOverTimePoint[];
+  issuesBySeverity: SeverityCount[];
+  feedbackSentiment: SentimentCount[];
+};
+
 // Dashboard types
 export type DashboardSummary = {
   totalTasks: number;

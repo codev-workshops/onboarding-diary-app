@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import type { AxiosError } from "axios";
-import type { DashboardData, ApiErrorResponse } from "../types";
+import type { DashboardData, ApiErrorResponse, ChecklistProgress } from "../types";
 import { useAuth } from "../hooks/useAuth";
 import * as dashboardService from "../services/dashboard.service";
+import * as checklistService from "../services/checklist.service";
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("en-US", {
@@ -39,6 +40,7 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [data, setData] = useState<DashboardData | null>(null);
+  const [checklistProgress, setChecklistProgress] = useState<ChecklistProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -47,6 +49,16 @@ export default function DashboardPage() {
       try {
         const result = await dashboardService.getDashboard();
         setData(result);
+
+        // Fetch checklist progress for recruits
+        if (user?.role === "recruit") {
+          try {
+            const progress = await checklistService.getChecklistProgress();
+            setChecklistProgress(progress);
+          } catch {
+            // silently handle if no checklists
+          }
+        }
       } catch (err) {
         const axiosErr = err as AxiosError<ApiErrorResponse>;
         setError(axiosErr.response?.data?.error?.message || "Failed to load dashboard");
@@ -55,7 +67,7 @@ export default function DashboardPage() {
       }
     }
     fetchDashboard();
-  }, []);
+  }, [user?.role]);
 
   if (loading) {
     return (
@@ -133,6 +145,53 @@ export default function DashboardPage() {
           <p className="text-2xl font-bold text-gray-900 mt-1">{summary.totalNotes}</p>
         </div>
       </div>
+
+      {/* Checklist Progress (Recruit only) */}
+      {checklistProgress && checklistProgress.totalChecklists > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Checklist Progress</h2>
+            <button
+              className="text-sm text-blue-600 hover:text-blue-800"
+              onClick={() => navigate("/checklists")}
+            >
+              View all
+            </button>
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 p-4 mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm text-gray-500">Overall Progress</p>
+              <p className="text-lg font-bold text-blue-600">{checklistProgress.overallPercent}%</p>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-3">
+              <div
+                className={`h-3 rounded-full transition-all ${checklistProgress.overallPercent === 100 ? "bg-green-500" : "bg-blue-500"}`}
+                style={{ width: `${checklistProgress.overallPercent}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {checklistProgress.completedItems} of {checklistProgress.totalItems} items completed
+              across {checklistProgress.totalChecklists} checklist{checklistProgress.totalChecklists !== 1 ? "s" : ""}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {checklistProgress.checklists.map((cl, idx) => (
+              <div key={idx} className="bg-white rounded-xl border border-gray-200 p-3">
+                <p className="text-sm font-medium text-gray-900 truncate mb-2">{cl.title}</p>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full transition-all ${cl.percent === 100 ? "bg-green-500" : "bg-blue-500"}`}
+                      style={{ width: `${cl.percent}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-medium text-gray-600 w-12 text-right">{cl.completed}/{cl.total}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Recent Entries */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
