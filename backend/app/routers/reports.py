@@ -123,10 +123,18 @@ async def _fetch_report_data(
     return data
 
 
-def _generate_csv(data: dict, file_path: str) -> None:
+def _generate_csv(data: dict, file_path: str, target_user: User | None = None) -> None:
     """Write report data to a CSV file."""
     with open(file_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
+
+        if target_user is not None:
+            writer.writerow(["Report for", target_user.full_name])
+            writer.writerow(["Email", target_user.email])
+            if target_user.department:
+                writer.writerow(["Department", target_user.department])
+            writer.writerow(["Role", target_user.role])
+            writer.writerow([])
 
         if "tasks" in data:
             writer.writerow(
@@ -171,13 +179,29 @@ def _generate_csv(data: dict, file_path: str) -> None:
             writer.writerow([])
 
 
-def _generate_pdf(data: dict, file_path: str, date_from: str, date_to: str) -> None:
+def _generate_pdf(
+    data: dict,
+    file_path: str,
+    date_from: str,
+    date_to: str,
+    target_user: User | None = None,
+) -> None:
     """Write report data to a PDF file."""
     doc = SimpleDocTemplate(file_path, pagesize=A4)
     styles = getSampleStyleSheet()
     elements: list = []
 
     elements.append(Paragraph("Onboarding Diary Report", styles["Title"]))
+    if target_user is not None:
+        elements.append(
+            Paragraph(f"Recruit: {target_user.full_name} ({target_user.email})", styles["Normal"])
+        )
+        dept = target_user.department or "N/A"
+        elements.append(
+            Paragraph(
+                f"Department: {dept} &nbsp;|&nbsp; Role: {target_user.role}", styles["Normal"]
+            )
+        )
     elements.append(Paragraph(f"Period: {date_from} to {date_to}", styles["Normal"]))
     elements.append(Spacer(1, 10 * mm))
 
@@ -250,6 +274,10 @@ async def generate_report(
 
     target_user_id = await _resolve_target_user(current_user, body.user_id, db)
 
+    # Fetch the target user for report header info
+    result = await db.execute(select(User).where(User.id == target_user_id))
+    target_user = result.scalar_one()
+
     # Fetch data
     data = await _fetch_report_data(db, target_user_id, body)
 
@@ -260,9 +288,9 @@ async def generate_report(
     file_path = os.path.join(REPORTS_DIR, file_name)
 
     if body.report_format.value == "csv":
-        _generate_csv(data, file_path)
+        _generate_csv(data, file_path, target_user)
     else:
-        _generate_pdf(data, file_path, str(body.date_from), str(body.date_to))
+        _generate_pdf(data, file_path, str(body.date_from), str(body.date_to), target_user)
 
     # Persist report record
     report = Report(
