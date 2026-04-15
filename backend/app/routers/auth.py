@@ -7,6 +7,7 @@ from app.auth.dependencies import get_current_user
 from app.auth.jwt import blocklist_token, create_access_token
 from app.auth.password import hash_password, verify_password
 from app.database import get_db
+
 from app.models.user import User
 from app.schemas.user import (
     ChangePassword,
@@ -50,7 +51,15 @@ async def login(data: UserLogin, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).where(User.email == data.email))
     user = result.scalar_one_or_none()
 
-    if user is None or not verify_password(data.password, user.password_hash):
+    # Always run bcrypt even for non-existent users to prevent timing-based enumeration
+    if user is None:
+        verify_password(data.password, "$2b$12$000000000000000000000u2a0FsLEBqZGGz1RUZN3GDlOSGKMBn.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+        )
+
+    if not verify_password(data.password, user.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",

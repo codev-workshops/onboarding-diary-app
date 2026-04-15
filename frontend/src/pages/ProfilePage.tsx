@@ -50,10 +50,10 @@ export default function ProfilePage() {
     try {
       await userApi.updateProfile({
         full_name: values.full_name,
-        department: values.department || undefined,
+        department: values.department || null,
         start_date: values.start_date
           ? values.start_date.format("YYYY-MM-DD")
-          : undefined,
+          : null,
       });
       await refreshUser();
       setProfileSuccess(true);

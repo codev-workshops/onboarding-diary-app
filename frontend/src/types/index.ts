@@ -39,8 +39,8 @@ export interface LoginData {
 
 export interface UserUpdateData {
   full_name?: string;
-  department?: string;
-  start_date?: string;
+  department?: string | null;
+  start_date?: string | null;
 }
 
 export interface ChangePasswordData {
