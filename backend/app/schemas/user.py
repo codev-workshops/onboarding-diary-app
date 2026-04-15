@@ -111,8 +111,10 @@ class UserUpdate(BaseModel):
 
     @field_validator("full_name")
     @classmethod
-    def full_name_alpha(cls, v: str | None) -> str | None:
-        if v is not None and not all(c.isalpha() or c.isspace() for c in v):
+    def full_name_not_null(cls, v: str | None) -> str | None:
+        if v is None:
+            raise ValueError("Full name cannot be null")
+        if not all(c.isalpha() or c.isspace() for c in v):
             raise ValueError("Full name must contain only alphabetic characters and spaces")
         return v
 
@@ -125,8 +127,17 @@ class AdminUserUpdate(BaseModel):
     @field_validator("role")
     @classmethod
     def validate_role(cls, v: str | None) -> str | None:
-        if v is not None and v not in ("recruit", "manager", "admin"):
+        if v is None:
+            raise ValueError("Role cannot be null")
+        if v not in ("recruit", "manager", "admin"):
             raise ValueError("Role must be one of: recruit, manager, admin")
+        return v
+
+    @field_validator("is_active")
+    @classmethod
+    def validate_is_active(cls, v: bool | None) -> bool | None:
+        if v is None:
+            raise ValueError("is_active cannot be null")
         return v
 
 
