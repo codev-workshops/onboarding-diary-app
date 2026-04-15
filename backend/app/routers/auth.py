@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -70,12 +71,10 @@ async def login(data: UserLogin, db: AsyncSession = Depends(get_db)):
 
 @router.post("/logout")
 async def logout(
+    credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),
     current_user: User = Depends(get_current_user),
 ):
-    # We need the raw token to blocklist it
-    # The dependency already validated it, so we blocklist via a header re-read
-    # For simplicity, we return success. The token blocklist is handled client-side
-    # by removing the token, and server-side the JTI approach handles it.
+    blocklist_token(credentials.credentials)
     return {"message": "Logged out"}
 
 
