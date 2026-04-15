@@ -33,8 +33,8 @@ class User(Base):
 
     # Relationships
     manager: Mapped["User | None"] = relationship(
-        "User", remote_side="User.id", back_populates="recruits", lazy="selectin"
+        "User", remote_side="User.id", back_populates="recruits", lazy="noload"
     )
     recruits: Mapped[list["User"]] = relationship(
-        "User", back_populates="manager", lazy="selectin"
+        "User", back_populates="manager", lazy="noload"
     )
