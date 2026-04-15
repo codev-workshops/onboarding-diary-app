@@ -53,3 +53,130 @@ export interface AdminUserUpdateData {
   is_active?: boolean;
   manager_id?: string | null;
 }
+
+// --- Task Types ---
+
+export interface Task {
+  id: string;
+  user_id: string;
+  date: string;
+  title: string;
+  description: string | null;
+  category: string;
+  status: string;
+  priority: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TaskCreateData {
+  date: string;
+  title: string;
+  description?: string;
+  category: string;
+  status: string;
+  priority: string;
+}
+
+export interface TaskUpdateData {
+  date?: string;
+  title?: string;
+  description?: string | null;
+  category?: string;
+  status?: string;
+  priority?: string;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  per_page: number;
+}
+
+// --- Issue Types ---
+
+export interface Issue {
+  id: string;
+  user_id: string;
+  date: string;
+  title: string;
+  description: string;
+  severity: string;
+  status: string;
+  resolution_notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface IssueCreateData {
+  date: string;
+  title: string;
+  description: string;
+  severity: string;
+  status: string;
+  resolution_notes?: string;
+}
+
+export interface IssueUpdateData {
+  date?: string;
+  title?: string;
+  description?: string;
+  severity?: string;
+  status?: string;
+  resolution_notes?: string | null;
+}
+
+// --- Feedback Types ---
+
+export interface Feedback {
+  id: string;
+  user_id: string;
+  date: string;
+  subject: string;
+  type: string;
+  details: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FeedbackCreateData {
+  date: string;
+  subject: string;
+  type: string;
+  details: string;
+}
+
+export interface FeedbackUpdateData {
+  date?: string;
+  subject?: string;
+  type?: string;
+  details?: string;
+}
+
+// --- Note Types ---
+
+export interface Note {
+  id: string;
+  user_id: string;
+  date: string;
+  title: string;
+  content: string;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NoteCreateData {
+  date: string;
+  title: string;
+  content: string;
+  tags: string[];
+}
+
+export interface NoteUpdateData {
+  date?: string;
+  title?: string;
+  content?: string;
+  tags?: string[];
+}

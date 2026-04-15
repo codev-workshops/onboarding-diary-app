@@ -18,6 +18,10 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ProfilePage from "./pages/ProfilePage";
+import TasksPage from "./pages/TasksPage";
+import IssuesPage from "./pages/IssuesPage";
+import FeedbackPage from "./pages/FeedbackPage";
+import NotesPage from "./pages/NotesPage";
 
 const { Sider, Content, Footer } = Layout;
 const { Title } = Typography;
@@ -121,10 +125,10 @@ function AppLayout() {
         <Content style={{ margin: 24, padding: 24, background: "#fff", borderRadius: 8 }}>
           <Routes>
             <Route path="/dashboard" element={<Placeholder name="Dashboard" />} />
-            <Route path="/tasks" element={<Placeholder name="Tasks" />} />
-            <Route path="/issues" element={<Placeholder name="Issues" />} />
-            <Route path="/feedback" element={<Placeholder name="Feedback" />} />
-            <Route path="/notes" element={<Placeholder name="Notes" />} />
+            <Route path="/tasks" element={<TasksPage />} />
+            <Route path="/issues" element={<IssuesPage />} />
+            <Route path="/feedback" element={<FeedbackPage />} />
+            <Route path="/notes" element={<NotesPage />} />
             <Route path="/reports" element={<Placeholder name="Reports" />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route
