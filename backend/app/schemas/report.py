@@ -1,12 +1,12 @@
+import datetime as dt
 import uuid
-from datetime import date, datetime
 
 from pydantic import BaseModel, field_validator
 
 
 class ReportGenerate(BaseModel):
-    date_from: date
-    date_to: date
+    date_from: dt.date
+    date_to: dt.date
     type: str
     format: str
     user_id: uuid.UUID | None = None
@@ -29,7 +29,7 @@ class ReportGenerate(BaseModel):
 
     @field_validator("date_to")
     @classmethod
-    def validate_date_range(cls, v: date, info) -> date:
+    def validate_date_range(cls, v: dt.date, info) -> dt.date:
         date_from = info.data.get("date_from")
         if date_from and v < date_from:
             raise ValueError("date_to must be >= date_from")
@@ -42,11 +42,11 @@ class ReportResponse(BaseModel):
     id: uuid.UUID
     generated_by: uuid.UUID
     target_user_id: uuid.UUID | None
-    date_from: date
-    date_to: date
+    date_from: dt.date
+    date_to: dt.date
     report_type: str
     format: str
-    created_at: datetime
+    created_at: dt.datetime
 
     model_config = {"from_attributes": True}
 

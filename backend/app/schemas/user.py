@@ -1,5 +1,5 @@
+import datetime as dt
 import uuid
-from datetime import date, datetime
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
@@ -12,7 +12,7 @@ class UserRegister(BaseModel):
     password: str = Field(min_length=8, max_length=128)
     full_name: str = Field(min_length=2, max_length=150)
     department: str | None = Field(default=None, max_length=100)
-    start_date: date | None = None
+    start_date: dt.date | None = None
 
     @field_validator("password")
     @classmethod
@@ -95,11 +95,11 @@ class UserResponse(BaseModel):
     full_name: str
     role: str
     department: str | None = None
-    start_date: date | None = None
+    start_date: dt.date | None = None
     is_active: bool
     manager_id: uuid.UUID | None = None
-    created_at: datetime
-    updated_at: datetime
+    created_at: dt.datetime
+    updated_at: dt.datetime
 
     model_config = {"from_attributes": True}
 
@@ -107,7 +107,7 @@ class UserResponse(BaseModel):
 class UserUpdate(BaseModel):
     full_name: str | None = Field(default=None, min_length=2, max_length=150)
     department: str | None = Field(default=None, max_length=100)
-    start_date: date | None = None
+    start_date: dt.date | None = None
 
     @field_validator("full_name")
     @classmethod
@@ -125,7 +125,7 @@ class AdminUserCreate(BaseModel):
     full_name: str = Field(min_length=2, max_length=150)
     role: str = "recruit"
     department: str | None = Field(default=None, max_length=100)
-    start_date: date | None = None
+    start_date: dt.date | None = None
 
     @field_validator("password")
     @classmethod

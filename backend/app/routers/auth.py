@@ -53,7 +53,7 @@ async def login(data: UserLogin, db: AsyncSession = Depends(get_db)):
 
     # Always run bcrypt even for non-existent users to prevent timing-based enumeration
     if user is None:
-        verify_password(data.password, "$2b$12$000000000000000000000u2a0FsLEBqZGGz1RUZN3GDlOSGKMBn.")
+        verify_password(data.password, "$2b$12$/0QJDEMBtjt./2GwKa/TdeYFSTm4orj71YXUI1sq5hFhC.Thhb1OK")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
