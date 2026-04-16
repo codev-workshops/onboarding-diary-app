@@ -12,6 +12,9 @@ import {
   Tag,
   Select,
   Typography,
+  Button,
+  List,
+  Checkbox,
   message,
 } from "antd";
 import {
@@ -20,9 +23,12 @@ import {
   MessageOutlined,
   FileTextOutlined,
   TrophyOutlined,
+  LineChartOutlined,
+  OrderedListOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { dashboardApi } from "../api/dashboard";
+import { checklistsApi } from "../api/checklists";
 import { useAuth } from "../context/useAuth";
 import EmptyState from "../components/EmptyState";
 import type {
@@ -32,6 +38,7 @@ import type {
   RecentIssue,
   RecentFeedback,
   RecentNote,
+  ChecklistData,
 } from "../types";
 
 const { Title } = Typography;
@@ -84,6 +91,16 @@ export default function DashboardPage() {
   const [selectedRecruit, setSelectedRecruit] = useState<string | undefined>(undefined);
 
   const isManager = user?.role === "manager" || user?.role === "admin";
+  const [checklists, setChecklists] = useState<ChecklistData[]>([]);
+
+  const loadChecklists = useCallback(async () => {
+    try {
+      const response = await checklistsApi.list(1, 5);
+      setChecklists(response.data.items);
+    } catch {
+      // silently fail
+    }
+  }, []);
 
   const loadDashboard = useCallback(async () => {
     setLoading(true);
@@ -108,7 +125,8 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadDashboard();
-  }, [loadDashboard]);
+    loadChecklists();
+  }, [loadDashboard, loadChecklists]);
 
   useEffect(() => {
     if (isManager) {
@@ -432,6 +450,61 @@ export default function DashboardPage() {
           </Row>
         </Card>
       )}
+
+      {/* Checklist Progress */}
+      {checklists.length > 0 && (
+        <Card
+          title="Onboarding Checklists"
+          style={{ marginBottom: 24 }}
+          extra={
+            <Button type="link" icon={<OrderedListOutlined />} onClick={() => navigate("/checklists")}>
+              View All
+            </Button>
+          }
+        >
+          <List
+            size="small"
+            dataSource={checklists.slice(0, 3)}
+            renderItem={(cl) => (
+              <List.Item>
+                <div style={{ width: "100%" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                    <span style={{ fontWeight: 500 }}>{cl.title}</span>
+                    <Tag color={cl.progress === 100 ? "green" : "blue"}>
+                      {cl.progress}%
+                    </Tag>
+                  </div>
+                  <Progress
+                    percent={cl.progress}
+                    size="small"
+                    status={cl.progress === 100 ? "success" : "active"}
+                    showInfo={false}
+                  />
+                  <div style={{ display: "flex", gap: 8, marginTop: 4, flexWrap: "wrap" }}>
+                    {cl.items.slice(0, 3).map((item) => (
+                      <Checkbox key={item.id} checked={item.is_completed} disabled>
+                        <span style={{ fontSize: 12, color: item.is_completed ? "#8c8c8c" : undefined }}>
+                          {item.title}
+                        </span>
+                      </Checkbox>
+                    ))}
+                    {cl.items.length > 3 && (
+                      <span style={{ fontSize: 12, color: "#8c8c8c" }}>+{cl.items.length - 3} more</span>
+                    )}
+                  </div>
+                </div>
+              </List.Item>
+            )}
+          />
+        </Card>
+      )}
+
+      {/* Quick Links */}
+      <Card size="small" style={{ marginBottom: 24 }}>
+        <Button type="link" icon={<LineChartOutlined />} onClick={() => navigate("/analytics")}>
+          View Analytics & Charts
+        </Button>
+      </Card>
 
       {/* Recent Entries */}
       <Card title="Recent Entries">

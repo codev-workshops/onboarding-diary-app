@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
-import { ConfigProvider, Layout, Menu, Typography, Button, Tag, Dropdown, Space, Drawer, Grid } from "antd";
+import { ConfigProvider, Layout, Menu, Typography, Button, Tag, Dropdown, Space, Drawer, Grid, Badge, Input, Popover, List } from "antd";
 import {
   DashboardOutlined,
   CheckSquareOutlined,
@@ -12,8 +12,14 @@ import {
   LogoutOutlined,
   TeamOutlined,
   MenuOutlined,
+  SearchOutlined,
+  BellOutlined,
+  LineChartOutlined,
+  OrderedListOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./context/useAuth";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -28,6 +34,14 @@ import NotesPage from "./pages/NotesPage";
 import DashboardPage from "./pages/DashboardPage";
 import ReportsPage from "./pages/ReportsPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
+import SearchPage from "./pages/SearchPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
+import ChecklistsPage from "./pages/ChecklistsPage";
+import NotificationsPage from "./pages/NotificationsPage";
+import { notificationsApi } from "./api/notifications";
+import type { NotificationData } from "./types";
+
+dayjs.extend(relativeTime);
 
 const { Sider, Content, Footer } = Layout;
 const { Title } = Typography;
@@ -39,8 +53,53 @@ function AppLayout() {
   const location = useLocation();
   const screens = useBreakpoint();
   const [drawerOpen, setDrawerOpenRaw] = useState(false);
+  const searchInputRef = { current: null as HTMLInputElement | null };
+  const [notifications, setNotifications] = useState<NotificationData[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifPopoverOpen, setNotifPopoverOpen] = useState(false);
 
   const isMobile = !screens.md;
+
+  // Ctrl+K / Cmd+K keyboard shortcut for search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Load notifications
+  const loadNotifications = useCallback(async () => {
+    try {
+      const response = await notificationsApi.list(1, 5);
+      setNotifications(response.data.items);
+      setUnreadCount(response.data.unread_count);
+    } catch {
+      // silently fail
+    }
+  }, []);
+
+  useEffect(() => {
+    const fetchAndSchedule = () => {
+      loadNotifications();
+      return setInterval(loadNotifications, 30000);
+    };
+    const interval = fetchAndSchedule();
+    return () => clearInterval(interval);
+  }, [loadNotifications]);
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      await notificationsApi.markAsRead(id);
+      loadNotifications();
+    } catch {
+      // silently fail
+    }
+  };
 
   const setDrawerOpen = useCallback((open: boolean) => {
     setDrawerOpenRaw(open);
@@ -63,6 +122,8 @@ function AppLayout() {
     { key: "/feedback", icon: <MessageOutlined />, label: "Feedback" },
     { key: "/notes", icon: <FileTextOutlined />, label: "Notes" },
     { key: "/reports", icon: <BarChartOutlined />, label: "Reports" },
+    { key: "/analytics", icon: <LineChartOutlined />, label: "Analytics" },
+    { key: "/checklists", icon: <OrderedListOutlined />, label: "Checklists" },
   ];
 
   if (user?.role === "admin") {
@@ -194,6 +255,74 @@ function AppLayout() {
             <div />
           )}
           <Space>
+            {!isMobile && (
+              <Input
+                ref={(el) => { searchInputRef.current = el?.input ?? null; }}
+                placeholder="Search... (Ctrl+K)"
+                prefix={<SearchOutlined />}
+                style={{ width: 220 }}
+                onPressEnter={(e) => {
+                  const val = (e.target as HTMLInputElement).value;
+                  if (val.trim()) {
+                    navigate(`/search?q=${encodeURIComponent(val.trim())}`);
+                    (e.target as HTMLInputElement).value = "";
+                  }
+                }}
+                allowClear
+              />
+            )}
+            <Popover
+              open={notifPopoverOpen}
+              onOpenChange={setNotifPopoverOpen}
+              trigger="click"
+              placement="bottomRight"
+              title="Notifications"
+              content={
+                <div style={{ width: 320, maxHeight: 400, overflow: "auto" }}>
+                  {notifications.length === 0 ? (
+                    <div style={{ padding: 16, textAlign: "center", color: "#8c8c8c" }}>
+                      No recent notifications
+                    </div>
+                  ) : (
+                    <List
+                      size="small"
+                      dataSource={notifications}
+                      renderItem={(n) => (
+                        <List.Item
+                          style={{
+                            background: n.is_read ? "transparent" : "#f0f5ff",
+                            padding: "8px 12px",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            if (!n.is_read) handleMarkAsRead(n.id);
+                          }}
+                        >
+                          <List.Item.Meta
+                            title={<span style={{ fontSize: 13, fontWeight: n.is_read ? 400 : 600 }}>{n.title}</span>}
+                            description={
+                              <>
+                                <div style={{ fontSize: 12, color: "#595959" }}>{n.message}</div>
+                                <div style={{ fontSize: 11, color: "#8c8c8c" }}>{dayjs(n.created_at).fromNow()}</div>
+                              </>
+                            }
+                          />
+                        </List.Item>
+                      )}
+                    />
+                  )}
+                  <div style={{ textAlign: "center", padding: 8, borderTop: "1px solid #f0f0f0" }}>
+                    <Button type="link" size="small" onClick={() => { setNotifPopoverOpen(false); navigate("/notifications"); }}>
+                      View All Notifications
+                    </Button>
+                  </div>
+                </div>
+              }
+            >
+              <Badge count={unreadCount} size="small" offset={[-2, 2]}>
+                <Button type="text" icon={<BellOutlined />} style={{ fontSize: 18 }} />
+              </Badge>
+            </Popover>
             <Tag color={roleColor}>{user?.role?.toUpperCase()}</Tag>
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
               <Button type="text" icon={<UserOutlined />}>
@@ -220,6 +349,10 @@ function AppLayout() {
               <Route path="/notes" element={<NotesPage />} />
               <Route path="/reports" element={<ReportsPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/checklists" element={<ChecklistsPage />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
               <Route
                 path="/admin/users"
                 element={
