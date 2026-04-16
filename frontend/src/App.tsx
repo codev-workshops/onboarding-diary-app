@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { ConfigProvider, Layout, Menu, Typography, Button, Tag, Dropdown, Space, Drawer, Grid, Badge, Input, Popover, List } from "antd";
 import {
@@ -17,7 +17,7 @@ import {
   LineChartOutlined,
   OrderedListOutlined,
 } from "@ant-design/icons";
-import type { MenuProps } from "antd";
+import type { MenuProps, InputRef } from "antd";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { AuthProvider } from "./context/AuthContext";
@@ -53,7 +53,7 @@ function AppLayout() {
   const location = useLocation();
   const screens = useBreakpoint();
   const [drawerOpen, setDrawerOpenRaw] = useState(false);
-  const searchInputRef = { current: null as HTMLInputElement | null };
+  const searchInputRef = useRef<InputRef>(null);
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifPopoverOpen, setNotifPopoverOpen] = useState(false);
@@ -257,7 +257,7 @@ function AppLayout() {
           <Space>
             {!isMobile && (
               <Input
-                ref={(el) => { searchInputRef.current = el?.input ?? null; }}
+                ref={searchInputRef}
                 placeholder="Search... (Ctrl+K)"
                 prefix={<SearchOutlined />}
                 style={{ width: 220 }}
