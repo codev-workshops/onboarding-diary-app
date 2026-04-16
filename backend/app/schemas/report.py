@@ -46,7 +46,6 @@ class ReportResponse(BaseModel):
     date_to: date
     report_type: str
     format: str
-    file_path: str
     created_at: datetime
 
     model_config = {"from_attributes": True}

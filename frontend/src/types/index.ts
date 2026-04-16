@@ -262,6 +262,5 @@ export interface Report {
   date_to: string;
   report_type: string;
   format: string;
-  file_path: string;
   created_at: string;
 }

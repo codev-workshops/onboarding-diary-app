@@ -14,9 +14,9 @@ import {
 import { DownloadOutlined, FileAddOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { reportsApi } from "../api/reports";
-import { usersApi } from "../api/users";
+import { dashboardApi } from "../api/dashboard";
 import { useAuth } from "../context/useAuth";
-import type { Report, User } from "../types";
+import type { Report, ManagerRecruit } from "../types";
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
@@ -29,7 +29,7 @@ export default function ReportsPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const [recruits, setRecruits] = useState<User[]>([]);
+  const [recruits, setRecruits] = useState<ManagerRecruit[]>([]);
 
   const isManagerOrAdmin = user?.role === "manager" || user?.role === "admin";
 
@@ -55,8 +55,8 @@ export default function ReportsPage() {
 
   const loadRecruits = async () => {
     try {
-      const response = await usersApi.list({ role: "recruit", is_active: true, per_page: 100 });
-      setRecruits(response.data.items);
+      const response = await dashboardApi.getManager();
+      setRecruits(response.data.recruits);
     } catch {
       // Silently fail
     }

@@ -178,7 +178,7 @@ async def generate_report(
     report = Report(
         id=report_id,
         generated_by=current_user.id,
-        target_user_id=data.user_id,
+        target_user_id=target_user_id,
         date_from=data.date_from,
         date_to=data.date_to,
         report_type=data.type,
@@ -239,7 +239,6 @@ async def list_reports(
 ):
     # Users see reports they generated or that target them
     if current_user.role == "admin":
-        base_filter = True  # noqa: E712 - admin sees all
         query = select(Report)
         count_query = select(func.count()).select_from(Report)
     else:
