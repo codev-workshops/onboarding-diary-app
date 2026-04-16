@@ -22,16 +22,12 @@ import TasksPage from "./pages/TasksPage";
 import IssuesPage from "./pages/IssuesPage";
 import FeedbackPage from "./pages/FeedbackPage";
 import NotesPage from "./pages/NotesPage";
+import DashboardPage from "./pages/DashboardPage";
+import ReportsPage from "./pages/ReportsPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
 
 const { Sider, Content, Footer } = Layout;
 const { Title } = Typography;
-
-const Placeholder = ({ name }: { name: string }) => (
-  <div style={{ padding: 24 }}>
-    <Title level={3}>{name}</Title>
-    <p>This page is under construction.</p>
-  </div>
-);
 
 function AppLayout() {
   const { user, logout } = useAuth();
@@ -124,18 +120,18 @@ function AppLayout() {
         </Layout.Header>
         <Content style={{ margin: 24, padding: 24, background: "#fff", borderRadius: 8 }}>
           <Routes>
-            <Route path="/dashboard" element={<Placeholder name="Dashboard" />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/issues" element={<IssuesPage />} />
             <Route path="/feedback" element={<FeedbackPage />} />
             <Route path="/notes" element={<NotesPage />} />
-            <Route path="/reports" element={<Placeholder name="Reports" />} />
+            <Route path="/reports" element={<ReportsPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route
               path="/admin/users"
               element={
                 <ProtectedRoute roles={["admin"]}>
-                  <Placeholder name="Admin - User Management" />
+                  <AdminUsersPage />
                 </ProtectedRoute>
               }
             />

@@ -16,6 +16,11 @@ from app.schemas.note import (
     NoteResponse,
     NoteUpdate,
 )
+from app.schemas.report import (
+    ReportGenerate,
+    ReportListResponse,
+    ReportResponse,
+)
 from app.schemas.task import (
     TaskCreate,
     TaskListResponse,
@@ -50,6 +55,9 @@ __all__ = [
     "NoteListResponse",
     "NoteResponse",
     "NoteUpdate",
+    "ReportGenerate",
+    "ReportListResponse",
+    "ReportResponse",
     "PasswordResetConfirm",
     "PasswordResetRequest",
     "TaskCreate",

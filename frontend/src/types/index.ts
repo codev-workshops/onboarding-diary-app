@@ -180,3 +180,88 @@ export interface NoteUpdateData {
   content?: string;
   tags?: string[];
 }
+
+// --- Dashboard Types ---
+
+export interface DashboardSummary {
+  total_tasks: number;
+  completed_tasks: number;
+  open_issues: number;
+  total_feedback: number;
+  total_notes: number;
+}
+
+export interface RecentTask {
+  id: string;
+  date: string;
+  title: string;
+  category: string;
+  status: string;
+  priority: string;
+}
+
+export interface RecentIssue {
+  id: string;
+  date: string;
+  title: string;
+  severity: string;
+  status: string;
+}
+
+export interface RecentFeedback {
+  id: string;
+  date: string;
+  subject: string;
+  type: string;
+}
+
+export interface RecentNote {
+  id: string;
+  date: string;
+  title: string;
+  tags: string[];
+}
+
+export interface DashboardData {
+  summary: DashboardSummary;
+  task_completion_rate: number;
+  recent_tasks: RecentTask[];
+  recent_issues: RecentIssue[];
+  recent_feedback: RecentFeedback[];
+  recent_notes: RecentNote[];
+}
+
+export interface ManagerRecruit {
+  id: string;
+  full_name: string;
+  email: string;
+  department: string | null;
+  start_date: string | null;
+}
+
+export interface ManagerDashboardData {
+  recruits: ManagerRecruit[];
+  aggregate_summary: DashboardSummary & { task_completion_rate: number };
+}
+
+// --- Report Types ---
+
+export interface ReportGenerateData {
+  date_from: string;
+  date_to: string;
+  type: string;
+  format: string;
+  user_id?: string;
+}
+
+export interface Report {
+  id: string;
+  generated_by: string;
+  target_user_id: string | null;
+  date_from: string;
+  date_to: string;
+  report_type: string;
+  format: string;
+  file_path: string;
+  created_at: string;
+}
