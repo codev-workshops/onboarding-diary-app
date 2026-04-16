@@ -28,6 +28,7 @@ from app.schemas.task import (
     TaskUpdate,
 )
 from app.schemas.user import (
+    AdminUserCreate,
     AdminUserUpdate,
     ChangePassword,
     PasswordResetConfirm,
@@ -41,6 +42,7 @@ from app.schemas.user import (
 )
 
 __all__ = [
+    "AdminUserCreate",
     "AdminUserUpdate",
     "ChangePassword",
     "FeedbackCreate",

@@ -102,9 +102,7 @@ export default function AdminUsersPage() {
       loadManagers();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { detail?: string } } };
-      if (error.response?.data?.detail) {
-        message.error(error.response.data.detail);
-      }
+      message.error(error.response?.data?.detail || "Failed to update user");
     } finally {
       setEditLoading(false);
     }
@@ -114,7 +112,7 @@ export default function AdminUsersPage() {
     setCreateLoading(true);
     try {
       const values = await createForm.validateFields();
-      await apiClient.post("/auth/register", {
+      await usersApi.create({
         email: values.email,
         password: values.password,
         full_name: values.full_name,
