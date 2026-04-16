@@ -310,6 +310,7 @@ async def add_checklist_item(
     )
     db.add(item)
     await db.flush()
+    await db.refresh(item)
 
     return {
         "id": item.id,
@@ -383,6 +384,7 @@ async def assign_checklist(
     )
     db.add(assignment)
     await db.flush()
+    await db.refresh(assignment)
 
     return {
         "id": assignment.id,
@@ -458,6 +460,7 @@ async def complete_item(
     )
     db.add(completion)
     await db.flush()
+    await db.refresh(completion)
 
     return {"message": "Item completed", "item_id": str(item_id), "completed_at": completion.completed_at.isoformat()}
 

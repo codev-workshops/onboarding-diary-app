@@ -3,8 +3,9 @@
 import uuid
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import or_, select, func, case, literal
+from sqlalchemy import or_, select, func, case, literal, union_all, String, Text
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.expression import cast
 
 from app.auth.dependencies import get_current_user
 from app.database import get_db
@@ -15,6 +16,99 @@ from app.models.task import Task
 from app.models.user import User
 
 router = APIRouter(prefix="/api/v1/search", tags=["Search"])
+
+
+def _build_subqueries(user_id: uuid.UUID, pattern: str, type_filter: str) -> list:
+    """Build per-entity SELECT statements for the UNION ALL query."""
+    subqueries = []
+
+    if type_filter in ("all", "tasks"):
+        subqueries.append(
+            select(
+                cast(Task.id, String).label("id"),
+                literal("task").label("type"),
+                Task.title.label("title"),
+                Task.description.label("snippet_source"),
+                cast(Task.date, String).label("date"),
+                Task.category.label("meta1"),
+                Task.status.label("meta2"),
+                literal(None).label("meta3"),
+                Task.created_at.label("created_at"),
+            ).where(
+                Task.user_id == user_id,
+                or_(
+                    Task.title.ilike(pattern),
+                    Task.description.ilike(pattern),
+                    Task.category.ilike(pattern),
+                ),
+            )
+        )
+
+    if type_filter in ("all", "issues"):
+        subqueries.append(
+            select(
+                cast(Issue.id, String).label("id"),
+                literal("issue").label("type"),
+                Issue.title.label("title"),
+                Issue.description.label("snippet_source"),
+                cast(Issue.date, String).label("date"),
+                Issue.severity.label("meta1"),
+                Issue.status.label("meta2"),
+                literal(None).label("meta3"),
+                Issue.created_at.label("created_at"),
+            ).where(
+                Issue.user_id == user_id,
+                or_(
+                    Issue.title.ilike(pattern),
+                    Issue.description.ilike(pattern),
+                    Issue.resolution_notes.ilike(pattern),
+                ),
+            )
+        )
+
+    if type_filter in ("all", "feedback"):
+        subqueries.append(
+            select(
+                cast(Feedback.id, String).label("id"),
+                literal("feedback").label("type"),
+                Feedback.subject.label("title"),
+                Feedback.details.label("snippet_source"),
+                cast(Feedback.date, String).label("date"),
+                Feedback.type.label("meta1"),
+                literal(None).label("meta2"),
+                literal(None).label("meta3"),
+                Feedback.created_at.label("created_at"),
+            ).where(
+                Feedback.user_id == user_id,
+                or_(
+                    Feedback.subject.ilike(pattern),
+                    Feedback.details.ilike(pattern),
+                ),
+            )
+        )
+
+    if type_filter in ("all", "notes"):
+        subqueries.append(
+            select(
+                cast(Note.id, String).label("id"),
+                literal("note").label("type"),
+                Note.title.label("title"),
+                Note.content.label("snippet_source"),
+                cast(Note.date, String).label("date"),
+                func.array_to_string(Note.tags, ",").label("meta1"),
+                literal(None).label("meta2"),
+                literal(None).label("meta3"),
+                Note.created_at.label("created_at"),
+            ).where(
+                Note.user_id == user_id,
+                or_(
+                    Note.title.ilike(pattern),
+                    Note.content.ilike(pattern),
+                ),
+            )
+        )
+
+    return subqueries
 
 
 @router.get("")
@@ -29,147 +123,61 @@ async def search(
     """Search across all entry types using ILIKE pattern matching."""
     user_id = current_user.id
     pattern = "%{}%".format(q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_"))
-    results: list[dict] = []
-
     offset = (page - 1) * per_page
 
-    # Search tasks
-    if type in ("all", "tasks"):
-        task_query = (
-            select(
-                Task.id,
-                Task.title,
-                Task.description,
-                Task.date,
-                Task.category,
-                Task.status,
-                literal("task").label("entry_type"),
-                Task.created_at,
-            )
-            .where(
-                Task.user_id == user_id,
-                or_(
-                    Task.title.ilike(pattern),
-                    Task.description.ilike(pattern),
-                    Task.category.ilike(pattern),
-                ),
-            )
-        )
-        task_result = await db.execute(task_query)
-        for row in task_result.all():
-            results.append({
-                "id": str(row.id),
-                "type": "task",
-                "title": row.title,
-                "snippet": _snippet(row.description, q),
-                "date": row.date.isoformat(),
-                "metadata": {"category": row.category, "status": row.status},
-                "created_at": row.created_at.isoformat() if row.created_at else None,
-            })
+    subqueries = _build_subqueries(user_id, pattern, type)
 
-    # Search issues
-    if type in ("all", "issues"):
-        issue_query = (
-            select(
-                Issue.id,
-                Issue.title,
-                Issue.description,
-                Issue.date,
-                Issue.severity,
-                Issue.status,
-                Issue.created_at,
-            )
-            .where(
-                Issue.user_id == user_id,
-                or_(
-                    Issue.title.ilike(pattern),
-                    Issue.description.ilike(pattern),
-                    Issue.resolution_notes.ilike(pattern),
-                ),
-            )
-        )
-        issue_result = await db.execute(issue_query)
-        for row in issue_result.all():
-            results.append({
-                "id": str(row.id),
-                "type": "issue",
-                "title": row.title,
-                "snippet": _snippet(row.description, q),
-                "date": row.date.isoformat(),
-                "metadata": {"severity": row.severity, "status": row.status},
-                "created_at": row.created_at.isoformat() if row.created_at else None,
-            })
+    if not subqueries:
+        return {
+            "items": [],
+            "total": 0,
+            "page": page,
+            "per_page": per_page,
+            "query": q,
+            "type_filter": type,
+        }
 
-    # Search feedback
-    if type in ("all", "feedback"):
-        feedback_query = (
-            select(
-                Feedback.id,
-                Feedback.subject,
-                Feedback.details,
-                Feedback.date,
-                Feedback.type,
-                Feedback.created_at,
-            )
-            .where(
-                Feedback.user_id == user_id,
-                or_(
-                    Feedback.subject.ilike(pattern),
-                    Feedback.details.ilike(pattern),
-                ),
-            )
-        )
-        feedback_result = await db.execute(feedback_query)
-        for row in feedback_result.all():
-            results.append({
-                "id": str(row.id),
-                "type": "feedback",
-                "title": row.subject,
-                "snippet": _snippet(row.details, q),
-                "date": row.date.isoformat(),
-                "metadata": {"feedback_type": row.type},
-                "created_at": row.created_at.isoformat() if row.created_at else None,
-            })
+    combined = union_all(*subqueries).subquery()
 
-    # Search notes
-    if type in ("all", "notes"):
-        note_query = (
-            select(
-                Note.id,
-                Note.title,
-                Note.content,
-                Note.date,
-                Note.tags,
-                Note.created_at,
-            )
-            .where(
-                Note.user_id == user_id,
-                or_(
-                    Note.title.ilike(pattern),
-                    Note.content.ilike(pattern),
-                ),
-            )
-        )
-        note_result = await db.execute(note_query)
-        for row in note_result.all():
-            results.append({
-                "id": str(row.id),
-                "type": "note",
-                "title": row.title,
-                "snippet": _snippet(row.content, q),
-                "date": row.date.isoformat(),
-                "metadata": {"tags": row.tags or []},
-                "created_at": row.created_at.isoformat() if row.created_at else None,
-            })
+    # Count total matching rows at the DB level
+    count_result = await db.execute(
+        select(func.count()).select_from(combined)
+    )
+    total = count_result.scalar_one()
 
-    # Sort by created_at descending
-    results.sort(key=lambda r: r.get("created_at") or "", reverse=True)
+    # Fetch only the requested page
+    rows_result = await db.execute(
+        select(combined)
+        .order_by(combined.c.created_at.desc())
+        .offset(offset)
+        .limit(per_page)
+    )
+    rows = rows_result.all()
 
-    total = len(results)
-    paginated = results[offset : offset + per_page]
+    results: list[dict] = []
+    for row in rows:
+        metadata: dict = {}
+        if row.type == "task":
+            metadata = {"category": row.meta1, "status": row.meta2}
+        elif row.type == "issue":
+            metadata = {"severity": row.meta1, "status": row.meta2}
+        elif row.type == "feedback":
+            metadata = {"feedback_type": row.meta1}
+        elif row.type == "note":
+            metadata = {"tags": row.meta1.split(",") if row.meta1 else []}
+
+        results.append({
+            "id": row.id,
+            "type": row.type,
+            "title": row.title,
+            "snippet": _snippet(row.snippet_source, q),
+            "date": row.date,
+            "metadata": metadata,
+            "created_at": row.created_at.isoformat() if row.created_at else None,
+        })
 
     return {
-        "items": paginated,
+        "items": results,
         "total": total,
         "page": page,
         "per_page": per_page,
