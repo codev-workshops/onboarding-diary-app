@@ -364,6 +364,8 @@ async def assign_checklist(
     target_user = user_result.scalar_one_or_none()
     if not target_user:
         raise HTTPException(status_code=404, detail="User not found")
+    if target_user.role != "recruit":
+        raise HTTPException(status_code=400, detail="Checklists can only be assigned to recruits")
 
     # Check if already assigned
     existing = await db.execute(
