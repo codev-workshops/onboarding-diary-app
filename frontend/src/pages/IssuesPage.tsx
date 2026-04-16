@@ -3,10 +3,12 @@ import {
   Button,
   DatePicker,
   Form,
+  Grid,
   Input,
   Modal,
   Popconfirm,
   Select,
+  Skeleton,
   Space,
   Table,
   Tag,
@@ -17,10 +19,12 @@ import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import dayjs from "dayjs";
 import { issuesApi } from "../api/issues";
+import EmptyState from "../components/EmptyState";
 import type { Issue, IssueCreateData, IssueUpdateData } from "../types";
 
 const { Title } = Typography;
 const { TextArea } = Input;
+const { useBreakpoint } = Grid;
 
 const SEVERITIES = [
   { value: "low", label: "Low" },
@@ -51,8 +55,10 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default function IssuesPage() {
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
   const [issues, setIssues] = useState<Issue[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [perPage] = useState(20);
@@ -204,54 +210,75 @@ export default function IssuesPage() {
     },
   ];
 
+  if (loading && issues.length === 0) {
+    return (
+      <div>
+        <Skeleton active paragraph={{ rows: 1 }} style={{ marginBottom: 16 }} />
+        <Skeleton active paragraph={{ rows: 8 }} />
+      </div>
+    );
+  }
+
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
         <Title level={3} style={{ margin: 0 }}>
           Issue Log
         </Title>
         <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-          New Issue
+          {isMobile ? "New" : "New Issue"}
         </Button>
       </div>
 
-      <Space wrap style={{ marginBottom: 16 }}>
+      <Space wrap style={{ marginBottom: 16, width: "100%" }}>
         <DatePicker.RangePicker
           onChange={(dates) => {
             setFilterDateRange(dates as [dayjs.Dayjs | null, dayjs.Dayjs | null] | null);
             setPage(1);
           }}
           allowClear
+          style={isMobile ? { width: "100%" } : undefined}
         />
         <Select
           placeholder="Severity"
           allowClear
-          style={{ width: 150 }}
+          style={{ width: isMobile ? "100%" : 150 }}
           options={SEVERITIES}
           onChange={(v) => { setFilterSeverity(v); setPage(1); }}
         />
         <Select
           placeholder="Status"
           allowClear
-          style={{ width: 150 }}
+          style={{ width: isMobile ? "100%" : 150 }}
           options={STATUSES}
           onChange={(v) => { setFilterStatus(v); setPage(1); }}
         />
       </Space>
 
-      <Table
-        columns={columns}
-        dataSource={issues}
-        rowKey="id"
-        loading={loading}
-        pagination={{
-          current: page,
-          pageSize: perPage,
-          total,
-          onChange: (p) => setPage(p),
-          showSizeChanger: false,
-        }}
-      />
+      {!loading && issues.length === 0 ? (
+        <EmptyState
+          title="No issues found"
+          description="Track any problems or blockers you encounter during onboarding."
+          actionText="Report Issue"
+          onAction={handleCreate}
+        />
+      ) : (
+        <Table
+          columns={columns}
+          dataSource={issues}
+          rowKey="id"
+          loading={loading}
+          scroll={{ x: isMobile ? 500 : undefined }}
+          pagination={{
+            current: page,
+            pageSize: perPage,
+            total,
+            onChange: (p) => setPage(p),
+            showSizeChanger: false,
+            size: isMobile ? "small" : undefined,
+          }}
+        />
+      )}
 
       <Modal
         title={editingIssue ? "Edit Issue" : "New Issue"}
@@ -259,7 +286,7 @@ export default function IssuesPage() {
         onCancel={() => setModalOpen(false)}
         onOk={handleSubmit}
         confirmLoading={submitting}
-        width={600}
+        width={isMobile ? "95vw" : 600}
       >
         <Form form={form} layout="vertical">
           <Form.Item name="date" label="Date" rules={[{ required: true, message: "Date is required" }]}>

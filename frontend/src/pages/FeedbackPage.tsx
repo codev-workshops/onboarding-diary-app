@@ -3,14 +3,14 @@ import {
   Button,
   Card,
   DatePicker,
-  Empty,
   Form,
+  Grid,
   Input,
   Modal,
   Popconfirm,
   Select,
+  Skeleton,
   Space,
-  Spin,
   Tag,
   Typography,
   message,
@@ -18,10 +18,12 @@ import {
 import { PlusOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { feedbackApi } from "../api/feedback";
+import EmptyState from "../components/EmptyState";
 import type { Feedback, FeedbackCreateData, FeedbackUpdateData } from "../types";
 
 const { Title, Paragraph, Text } = Typography;
 const { TextArea } = Input;
+const { useBreakpoint } = Grid;
 
 const FEEDBACK_TYPES = [
   { value: "positive", label: "Positive" },
@@ -36,8 +38,10 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 export default function FeedbackPage() {
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
   const [feedbackItems, setFeedbackItems] = useState<Feedback[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [perPage] = useState(20);
@@ -132,43 +136,55 @@ export default function FeedbackPage() {
 
   const hasMore = page * perPage < total;
 
+  if (loading && feedbackItems.length === 0) {
+    return (
+      <div>
+        <Skeleton active paragraph={{ rows: 1 }} style={{ marginBottom: 16 }} />
+        <Skeleton.Node active style={{ width: "100%", height: 120, marginBottom: 16 }} />
+        <Skeleton.Node active style={{ width: "100%", height: 120 }} />
+      </div>
+    );
+  }
+
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 8 }}>
         <Title level={3} style={{ margin: 0 }}>
           Feedback
         </Title>
         <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-          New Feedback
+          {isMobile ? "New" : "New Feedback"}
         </Button>
       </div>
 
-      <Space wrap style={{ marginBottom: 16 }}>
+      <Space wrap style={{ marginBottom: 16, width: "100%" }}>
         <DatePicker.RangePicker
           onChange={(dates) => {
             setFilterDateRange(dates as [dayjs.Dayjs | null, dayjs.Dayjs | null] | null);
             setPage(1);
           }}
           allowClear
+          style={isMobile ? { width: "100%" } : undefined}
         />
         <Select
           placeholder="Type"
           allowClear
-          style={{ width: 150 }}
+          style={{ width: isMobile ? "100%" : 150 }}
           options={FEEDBACK_TYPES}
           onChange={(v) => { setFilterType(v); setPage(1); }}
         />
       </Space>
 
-      {loading ? (
-        <div style={{ textAlign: "center", padding: 40 }}>
-          <Spin size="large" />
-        </div>
-      ) : feedbackItems.length === 0 ? (
-        <Empty description="No feedback yet" />
+      {!loading && feedbackItems.length === 0 ? (
+        <EmptyState
+          title="No feedback yet"
+          description="Share your thoughts about your onboarding experience."
+          actionText="Add Feedback"
+          onAction={handleCreate}
+        />
       ) : (
         <>
-          <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))" }}>
+          <div style={{ display: "grid", gap: 16, gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(350px, 1fr))" }}>
             {feedbackItems.map((fb) => (
               <Card
                 key={fb.id}
@@ -221,7 +237,7 @@ export default function FeedbackPage() {
         onCancel={() => setModalOpen(false)}
         onOk={handleSubmit}
         confirmLoading={submitting}
-        width={600}
+        width={isMobile ? "95vw" : 600}
       >
         <Form form={form} layout="vertical">
           <Form.Item name="date" label="Date" rules={[{ required: true, message: "Date is required" }]}>

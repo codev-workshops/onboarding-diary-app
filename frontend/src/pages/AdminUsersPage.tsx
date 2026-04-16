@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Card,
+  Grid,
   Table,
   Tag,
   Button,
@@ -8,6 +9,7 @@ import {
   Form,
   Input,
   Select,
+  Skeleton,
   Switch,
   Typography,
   message,
@@ -15,16 +17,20 @@ import {
 } from "antd";
 import { EditOutlined, UserAddOutlined } from "@ant-design/icons";
 import { usersApi } from "../api/users";
+import EmptyState from "../components/EmptyState";
 import type { User, AdminUserUpdateData } from "../types";
 
 const { Title } = Typography;
+const { useBreakpoint } = Grid;
 
 export default function AdminUsersPage() {
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
   const [users, setUsers] = useState<User[]>([]);
   const [managers, setManagers] = useState<User[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
   const [activeFilter, setActiveFilter] = useState<boolean | undefined>(undefined);
 
@@ -39,15 +45,7 @@ export default function AdminUsersPage() {
   const [createForm] = Form.useForm();
   const [createLoading, setCreateLoading] = useState(false);
 
-  useEffect(() => {
-    loadUsers();
-  }, [page, roleFilter, activeFilter]);
-
-  useEffect(() => {
-    loadManagers();
-  }, []);
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     setLoading(true);
     try {
       const response = await usersApi.list({
@@ -63,16 +61,24 @@ export default function AdminUsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, roleFilter, activeFilter]);
 
-  const loadManagers = async () => {
+  const loadManagers = useCallback(async () => {
     try {
       const response = await usersApi.list({ role: "manager", is_active: true, per_page: 100 });
       setManagers(response.data.items);
     } catch {
       // Silently fail
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
+
+  useEffect(() => {
+    loadManagers();
+  }, [loadManagers]);
 
   const handleEdit = (record: User) => {
     setEditingUser(record);
@@ -143,57 +149,81 @@ export default function AdminUsersPage() {
       dataIndex: "full_name",
       key: "full_name",
     },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-    },
+    ...(isMobile
+      ? []
+      : [
+          {
+            title: "Email",
+            dataIndex: "email",
+            key: "email",
+          },
+        ]),
     {
       title: "Role",
       dataIndex: "role",
       key: "role",
+      width: 100,
       render: (role: string) => (
         <Tag color={roleColors[role]}>{role.toUpperCase()}</Tag>
       ),
     },
-    {
-      title: "Department",
-      dataIndex: "department",
-      key: "department",
-      render: (val: string | null) => val || "-",
-    },
+    ...(isMobile
+      ? []
+      : [
+          {
+            title: "Department",
+            dataIndex: "department",
+            key: "department",
+            render: (val: string | null) => val || "-",
+          },
+        ]),
     {
       title: "Status",
       dataIndex: "is_active",
       key: "is_active",
+      width: 90,
       render: (active: boolean) => (
         <Tag color={active ? "green" : "red"}>{active ? "Active" : "Inactive"}</Tag>
       ),
     },
-    {
-      title: "Manager",
-      dataIndex: "manager_id",
-      key: "manager_id",
-      render: (managerId: string | null) => {
-        if (!managerId) return "-";
-        const mgr = managers.find((m) => m.id === managerId);
-        return mgr ? mgr.full_name : managerId;
-      },
-    },
+    ...(isMobile
+      ? []
+      : [
+          {
+            title: "Manager",
+            dataIndex: "manager_id",
+            key: "manager_id",
+            render: (managerId: string | null) => {
+              if (!managerId) return "-";
+              const mgr = managers.find((m) => m.id === managerId);
+              return mgr ? mgr.full_name : managerId;
+            },
+          },
+        ]),
     {
       title: "Actions",
       key: "actions",
+      width: 80,
       render: (_: unknown, record: User) => (
         <Button
           type="link"
           icon={<EditOutlined />}
           onClick={() => handleEdit(record)}
         >
-          Edit
+          {isMobile ? "" : "Edit"}
         </Button>
       ),
     },
   ];
+
+  if (loading && users.length === 0) {
+    return (
+      <div>
+        <Skeleton active paragraph={{ rows: 1 }} style={{ marginBottom: 16 }} />
+        <Card><Skeleton active paragraph={{ rows: 8 }} /></Card>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -206,15 +236,15 @@ export default function AdminUsersPage() {
             icon={<UserAddOutlined />}
             onClick={() => setCreateModalOpen(true)}
           >
-            Create User
+            {isMobile ? "New" : "Create User"}
           </Button>
         }
       >
-        <Space style={{ marginBottom: 16 }}>
+        <Space wrap style={{ marginBottom: 16, width: "100%" }}>
           <Select
             placeholder="Filter by role"
             allowClear
-            style={{ width: 150 }}
+            style={{ width: isMobile ? "100%" : 150 }}
             value={roleFilter}
             onChange={(val) => {
               setRoleFilter(val);
@@ -228,7 +258,7 @@ export default function AdminUsersPage() {
           <Select
             placeholder="Filter by status"
             allowClear
-            style={{ width: 150 }}
+            style={{ width: isMobile ? "100%" : 150 }}
             value={activeFilter === undefined ? undefined : activeFilter ? "active" : "inactive"}
             onChange={(val) => {
               setActiveFilter(val === undefined ? undefined : val === "active");
@@ -240,19 +270,30 @@ export default function AdminUsersPage() {
           </Select>
         </Space>
 
-        <Table<User>
-          dataSource={users}
-          columns={columns}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            current: page,
-            total,
-            pageSize: 20,
-            onChange: (p) => setPage(p),
-            showTotal: (t) => `Total ${t} users`,
-          }}
-        />
+        {!loading && users.length === 0 ? (
+          <EmptyState
+            title="No users found"
+            description="Create user accounts to manage your team."
+            actionText="Create User"
+            onAction={() => setCreateModalOpen(true)}
+          />
+        ) : (
+          <Table<User>
+            dataSource={users}
+            columns={columns}
+            rowKey="id"
+            loading={loading}
+            scroll={{ x: isMobile ? 400 : undefined }}
+            pagination={{
+              current: page,
+              total,
+              pageSize: 20,
+              onChange: (p) => setPage(p),
+              showTotal: isMobile ? undefined : (t) => `Total ${t} users`,
+              size: isMobile ? "small" : undefined,
+            }}
+          />
+        )}
       </Card>
 
       {/* Edit User Modal */}
@@ -265,6 +306,7 @@ export default function AdminUsersPage() {
         }}
         onOk={handleEditSubmit}
         confirmLoading={editLoading}
+        width={isMobile ? "95vw" : 520}
       >
         <Form form={editForm} layout="vertical">
           <Form.Item name="role" label="Role" rules={[{ required: true }]}>
@@ -299,6 +341,7 @@ export default function AdminUsersPage() {
         }}
         onOk={handleCreate}
         confirmLoading={createLoading}
+        width={isMobile ? "95vw" : 520}
       >
         <Form form={createForm} layout="vertical">
           <Form.Item

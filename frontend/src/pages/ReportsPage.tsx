@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Card,
   Form,
   DatePicker,
+  Grid,
   Select,
   Button,
+  Skeleton,
   Table,
   Typography,
   message,
@@ -16,31 +18,28 @@ import dayjs from "dayjs";
 import { reportsApi } from "../api/reports";
 import { dashboardApi } from "../api/dashboard";
 import { useAuth } from "../context/useAuth";
+import EmptyState from "../components/EmptyState";
 import type { Report, ManagerRecruit } from "../types";
 
 const { Title } = Typography;
 const { RangePicker } = DatePicker;
+const { useBreakpoint } = Grid;
 
 export default function ReportsPage() {
   const { user } = useAuth();
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
   const [form] = Form.useForm();
   const [reports, setReports] = useState<Report[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [recruits, setRecruits] = useState<ManagerRecruit[]>([]);
 
   const isManagerOrAdmin = user?.role === "manager" || user?.role === "admin";
 
-  useEffect(() => {
-    loadReports();
-    if (isManagerOrAdmin) {
-      loadRecruits();
-    }
-  }, [page]);
-
-  const loadReports = async () => {
+  const loadReports = useCallback(async () => {
     setLoading(true);
     try {
       const response = await reportsApi.list(page, 20);
@@ -51,16 +50,23 @@ export default function ReportsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page]);
 
-  const loadRecruits = async () => {
+  const loadRecruits = useCallback(async () => {
     try {
       const response = await dashboardApi.getManager();
       setRecruits(response.data.recruits);
     } catch {
       // Silently fail
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadReports();
+    if (isManagerOrAdmin) {
+      loadRecruits();
+    }
+  }, [loadReports, isManagerOrAdmin, loadRecruits]);
 
   const handleGenerate = async (values: {
     date_range: [dayjs.Dayjs, dayjs.Dayjs];
@@ -162,7 +168,7 @@ export default function ReportsPage() {
       <Card title="Generate Report" style={{ marginBottom: 24 }}>
         <Form
           form={form}
-          layout="inline"
+          layout={isMobile ? "vertical" : "inline"}
           onFinish={handleGenerate}
           initialValues={{ type: "combined", format: "csv" }}
           style={{ flexWrap: "wrap", gap: 8 }}
@@ -228,19 +234,30 @@ export default function ReportsPage() {
 
       {/* Report History */}
       <Card title="Report History">
-        <Table<Report>
-          dataSource={reports}
-          columns={columns}
-          rowKey="id"
-          loading={loading}
-          pagination={{
-            current: page,
-            total,
-            pageSize: 20,
-            onChange: (p) => setPage(p),
-            showTotal: (t) => `Total ${t} reports`,
-          }}
-        />
+        {loading && reports.length === 0 ? (
+          <Skeleton active paragraph={{ rows: 6 }} />
+        ) : !loading && reports.length === 0 ? (
+          <EmptyState
+            title="No reports yet"
+            description="Generate your first report using the form above."
+          />
+        ) : (
+          <Table<Report>
+            dataSource={reports}
+            columns={columns}
+            rowKey="id"
+            loading={loading}
+            scroll={{ x: isMobile ? 600 : undefined }}
+            pagination={{
+              current: page,
+              total,
+              pageSize: 20,
+              onChange: (p) => setPage(p),
+              showTotal: isMobile ? undefined : (t) => `Total ${t} reports`,
+              size: isMobile ? "small" : undefined,
+            }}
+          />
+        )}
       </Card>
     </div>
   );

@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Card,
   Col,
+  Grid,
   Row,
   Statistic,
   Progress,
+  Skeleton,
   Tabs,
   Table,
   Tag,
   Select,
   Typography,
-  Spin,
   message,
 } from "antd";
 import {
@@ -23,6 +24,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { dashboardApi } from "../api/dashboard";
 import { useAuth } from "../context/useAuth";
+import EmptyState from "../components/EmptyState";
 import type {
   DashboardData,
   ManagerDashboardData,
@@ -33,6 +35,7 @@ import type {
 } from "../types";
 
 const { Title } = Typography;
+const { useBreakpoint } = Grid;
 
 const categoryColors: Record<string, string> = {
   training: "blue",
@@ -73,6 +76,8 @@ const feedbackTypeColors: Record<string, string> = {
 export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
   const [managerData, setManagerData] = useState<ManagerDashboardData | null>(null);
@@ -80,17 +85,7 @@ export default function DashboardPage() {
 
   const isManager = user?.role === "manager" || user?.role === "admin";
 
-  useEffect(() => {
-    loadDashboard();
-  }, []);
-
-  useEffect(() => {
-    if (isManager) {
-      loadManagerDashboard();
-    }
-  }, [isManager, selectedRecruit]);
-
-  const loadDashboard = async () => {
+  const loadDashboard = useCallback(async () => {
     setLoading(true);
     try {
       const response = await dashboardApi.get();
@@ -100,16 +95,26 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadManagerDashboard = async () => {
+  const loadManagerDashboard = useCallback(async () => {
     try {
       const response = await dashboardApi.getManager(selectedRecruit);
       setManagerData(response.data);
     } catch {
       // Silently fail for manager dashboard - user may not have recruits
     }
-  };
+  }, [selectedRecruit]);
+
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
+
+  useEffect(() => {
+    if (isManager) {
+      loadManagerDashboard();
+    }
+  }, [isManager, loadManagerDashboard]);
 
   const taskColumns = [
     {
@@ -206,13 +211,29 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div style={{ textAlign: "center", padding: 80 }}>
-        <Spin size="large" />
+      <div>
+        <Skeleton active paragraph={{ rows: 1 }} style={{ marginBottom: 16 }} />
+        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Col xs={24} sm={12} md={8} lg={4} key={i}>
+              <Card><Skeleton active paragraph={{ rows: 1 }} /></Card>
+            </Col>
+          ))}
+        </Row>
+        <Card style={{ marginBottom: 24 }}><Skeleton active paragraph={{ rows: 2 }} /></Card>
+        <Card><Skeleton active paragraph={{ rows: 4 }} /></Card>
       </div>
     );
   }
 
-  if (!data) return null;
+  if (!data) {
+    return (
+      <EmptyState
+        title="No dashboard data"
+        description="Start by creating tasks, logging issues, or adding feedback."
+      />
+    );
+  }
 
   const tabItems = [
     {
@@ -365,7 +386,7 @@ export default function DashboardPage() {
             <Select
               placeholder="All recruits"
               allowClear
-              style={{ width: 200 }}
+              style={{ width: isMobile ? 140 : 200 }}
               value={selectedRecruit}
               onChange={(val) => setSelectedRecruit(val)}
               options={managerData.recruits.map((r) => ({
@@ -376,17 +397,17 @@ export default function DashboardPage() {
           }
         >
           <Row gutter={[16, 16]}>
-            <Col span={4}>
+            <Col xs={12} sm={8} md={4}>
               <Statistic title="Team Tasks" value={managerData.aggregate_summary.total_tasks} />
             </Col>
-            <Col span={4}>
+            <Col xs={12} sm={8} md={4}>
               <Statistic
                 title="Completed"
                 value={managerData.aggregate_summary.completed_tasks}
                 valueStyle={{ color: "#3f8600" }}
               />
             </Col>
-            <Col span={4}>
+            <Col xs={12} sm={8} md={4}>
               <Statistic
                 title="Open Issues"
                 value={managerData.aggregate_summary.open_issues}
@@ -395,13 +416,13 @@ export default function DashboardPage() {
                 }
               />
             </Col>
-            <Col span={4}>
+            <Col xs={12} sm={8} md={4}>
               <Statistic title="Feedback" value={managerData.aggregate_summary.total_feedback} />
             </Col>
-            <Col span={4}>
+            <Col xs={12} sm={8} md={4}>
               <Statistic title="Notes" value={managerData.aggregate_summary.total_notes} />
             </Col>
-            <Col span={4}>
+            <Col xs={12} sm={8} md={4}>
               <Statistic
                 title="Completion Rate"
                 value={managerData.aggregate_summary.task_completion_rate}
