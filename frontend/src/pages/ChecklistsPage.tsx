@@ -23,7 +23,6 @@ import {
   UserAddOutlined,
 } from "@ant-design/icons";
 import { checklistsApi } from "../api/checklists";
-import { usersApi } from "../api/users";
 import { useAuth } from "../context/useAuth";
 import type { ChecklistData, User } from "../types";
 
@@ -68,11 +67,7 @@ export default function ChecklistsPage() {
 
   const loadRecruits = async () => {
     try {
-      const response = await usersApi.list({
-        role: "recruit",
-        is_active: true,
-        per_page: 100,
-      });
+      const response = await checklistsApi.listRecruits();
       setRecruits(response.data.items);
     } catch {
       // silently fail
@@ -300,7 +295,7 @@ export default function ChecklistsPage() {
                     <Checkbox
                       checked={item.is_completed}
                       onChange={() => handleToggleItem(item.id, item.is_completed)}
-                      disabled={isManagerOrAdmin && user?.role !== "admin"}
+                      disabled={isManagerOrAdmin}
                     >
                       <span
                         style={{

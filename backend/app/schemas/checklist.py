@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 class ChecklistItemCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=200)
     description: str | None = None
-    order: int = 0
+    order: int | None = None
 
 
 class ChecklistItemResponse(BaseModel):

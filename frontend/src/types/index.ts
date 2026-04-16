@@ -332,7 +332,7 @@ export interface Milestone {
 }
 
 export interface OnboardingProgress {
-  start_date: string;
+  start_date: string | null;
   current_day: number;
   milestones: Milestone[];
 }

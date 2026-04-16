@@ -31,6 +31,42 @@ from app.schemas.checklist import (
 router = APIRouter(prefix="/api/v1/checklists", tags=["Checklists"])
 
 
+# --- Helper: list recruits for managers ---
+
+@router.get("/recruits", tags=["Checklists"])
+async def list_recruits(
+    current_user: User = Depends(require_manager),
+    db: AsyncSession = Depends(get_db),
+):
+    """List active recruits for checklist assignment (manager/admin only)."""
+    result = await db.execute(
+        select(User)
+        .where(User.role == "recruit", User.is_active.is_(True))
+        .order_by(User.full_name)
+    )
+    users = result.scalars().all()
+    return {
+        "items": [
+            {
+                "id": str(u.id),
+                "email": u.email,
+                "full_name": u.full_name,
+                "role": u.role,
+                "department": u.department,
+                "start_date": u.start_date.isoformat() if u.start_date else None,
+                "is_active": u.is_active,
+                "manager_id": str(u.manager_id) if u.manager_id else None,
+                "created_at": u.created_at.isoformat() if u.created_at else None,
+                "updated_at": u.updated_at.isoformat() if u.updated_at else None,
+            }
+            for u in users
+        ],
+        "total": len(users),
+        "page": 1,
+        "per_page": len(users),
+    }
+
+
 def _build_checklist_response(
     checklist: Checklist, user_id: uuid.UUID | None = None
 ) -> dict:
@@ -107,7 +143,7 @@ async def create_checklist(
             checklist_id=checklist.id,
             title=item_data.title,
             description=item_data.description,
-            order=item_data.order if item_data.order != 0 else i,
+            order=item_data.order if item_data.order is not None else i,
         )
         db.add(item)
 
@@ -270,7 +306,7 @@ async def add_checklist_item(
         checklist_id=checklist_id,
         title=data.title,
         description=data.description,
-        order=data.order,
+        order=data.order if data.order is not None else 0,
     )
     db.add(item)
     await db.flush()

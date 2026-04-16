@@ -134,7 +134,7 @@ async def _get_onboarding_progress(
     """Calculate onboarding progress milestones."""
     start = user.start_date
     if not start:
-        return {"milestones": [], "current_day": 0}
+        return {"milestones": [], "current_day": 0, "start_date": None}
 
     today = date.today()
     days_since_start = (today - start).days

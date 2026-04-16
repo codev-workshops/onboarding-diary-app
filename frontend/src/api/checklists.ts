@@ -1,9 +1,12 @@
 import client from "./client";
-import type { ChecklistData, ChecklistCreateData, PaginatedResponse } from "../types";
+import type { ChecklistData, ChecklistCreateData, PaginatedResponse, User } from "../types";
 
 export const checklistsApi = {
   list: (page: number = 1, perPage: number = 20) =>
     client.get<PaginatedResponse<ChecklistData>>("/checklists", { params: { page, per_page: perPage } }),
+
+  listRecruits: () =>
+    client.get<PaginatedResponse<User>>("/checklists/recruits"),
 
   get: (id: string) =>
     client.get<ChecklistData>(`/checklists/${id}`),
