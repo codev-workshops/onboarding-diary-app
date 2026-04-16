@@ -28,7 +28,7 @@ async def search(
 ):
     """Search across all entry types using ILIKE pattern matching."""
     user_id = current_user.id
-    pattern = f"%{q}%"
+    pattern = "%{}%".format(q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_"))
     results: list[dict] = []
 
     offset = (page - 1) * per_page
