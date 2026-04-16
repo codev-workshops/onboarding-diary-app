@@ -145,9 +145,10 @@ export default function FeedbackPage() {
 
       <Space wrap style={{ marginBottom: 16 }}>
         <DatePicker.RangePicker
-          onChange={(dates) =>
-            setFilterDateRange(dates as [dayjs.Dayjs | null, dayjs.Dayjs | null] | null)
-          }
+          onChange={(dates) => {
+            setFilterDateRange(dates as [dayjs.Dayjs | null, dayjs.Dayjs | null] | null);
+            setPage(1);
+          }}
           allowClear
         />
         <Select
@@ -155,7 +156,7 @@ export default function FeedbackPage() {
           allowClear
           style={{ width: 150 }}
           options={FEEDBACK_TYPES}
-          onChange={(v) => setFilterType(v)}
+          onChange={(v) => { setFilterType(v); setPage(1); }}
         />
       </Space>
 

@@ -244,9 +244,10 @@ export default function TasksPage() {
 
       <Space wrap style={{ marginBottom: 16 }}>
         <DatePicker.RangePicker
-          onChange={(dates) =>
-            setFilterDateRange(dates as [dayjs.Dayjs | null, dayjs.Dayjs | null] | null)
-          }
+          onChange={(dates) => {
+            setFilterDateRange(dates as [dayjs.Dayjs | null, dayjs.Dayjs | null] | null);
+            setPage(1);
+          }}
           allowClear
         />
         <Select
@@ -254,14 +255,14 @@ export default function TasksPage() {
           allowClear
           style={{ width: 150 }}
           options={CATEGORIES}
-          onChange={(v) => setFilterCategory(v)}
+          onChange={(v) => { setFilterCategory(v); setPage(1); }}
         />
         <Select
           placeholder="Status"
           allowClear
           style={{ width: 150 }}
           options={STATUSES}
-          onChange={(v) => setFilterStatus(v)}
+          onChange={(v) => { setFilterStatus(v); setPage(1); }}
         />
       </Space>
 

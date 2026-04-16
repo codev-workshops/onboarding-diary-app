@@ -143,9 +143,10 @@ export default function NotesPage() {
 
       <Space wrap style={{ marginBottom: 16 }}>
         <DatePicker.RangePicker
-          onChange={(dates) =>
-            setFilterDateRange(dates as [dayjs.Dayjs | null, dayjs.Dayjs | null] | null)
-          }
+          onChange={(dates) => {
+            setFilterDateRange(dates as [dayjs.Dayjs | null, dayjs.Dayjs | null] | null);
+            setPage(1);
+          }}
           allowClear
         />
         <Select
@@ -154,7 +155,7 @@ export default function NotesPage() {
           allowClear
           style={{ minWidth: 200 }}
           options={allTags.map((t) => ({ value: t, label: t }))}
-          onChange={(v) => setFilterTags(v)}
+          onChange={(v) => { setFilterTags(v); setPage(1); }}
           value={filterTags}
         />
       </Space>
