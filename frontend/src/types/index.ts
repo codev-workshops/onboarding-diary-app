@@ -54,6 +54,14 @@ export interface AdminUserUpdateData {
   manager_id?: string | null;
 }
 
+export interface AdminUserCreateData {
+  email: string;
+  password: string;
+  full_name: string;
+  role?: string;
+  department?: string;
+}
+
 // --- Task Types ---
 
 export interface Task {

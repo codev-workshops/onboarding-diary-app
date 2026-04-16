@@ -15,7 +15,6 @@ import {
 } from "antd";
 import { EditOutlined, UserAddOutlined } from "@ant-design/icons";
 import { usersApi } from "../api/users";
-import apiClient from "../api/client";
 import type { User, AdminUserUpdateData } from "../types";
 
 const { Title } = Typography;

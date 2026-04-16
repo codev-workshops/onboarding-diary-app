@@ -5,9 +5,11 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.dependencies import get_current_user, require_admin
+from app.auth.password import hash_password
 from app.database import get_db
 from app.models.user import User
 from app.schemas.user import (
+    AdminUserCreate,
     AdminUserUpdate,
     UserListResponse,
     UserResponse,
@@ -69,6 +71,34 @@ async def list_users(
         page=page,
         per_page=per_page,
     )
+
+
+@router.post("", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def create_user(
+    data: AdminUserCreate,
+    _admin: User = Depends(require_admin),
+    db: AsyncSession = Depends(get_db),
+):
+    # Check if email already exists
+    result = await db.execute(select(User).where(User.email == data.email))
+    if result.scalar_one_or_none() is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Email already registered",
+        )
+
+    user = User(
+        email=data.email,
+        password_hash=hash_password(data.password),
+        full_name=data.full_name,
+        role=data.role,
+        department=data.department,
+        start_date=data.start_date,
+    )
+    db.add(user)
+    await db.flush()
+    await db.refresh(user)
+    return user
 
 
 @router.get("/{user_id}", response_model=UserResponse)
