@@ -10,6 +10,8 @@ using OnboardingDiary.Api.Data;
 using OnboardingDiary.Api.Middleware;
 using OnboardingDiary.Api.Services;
 
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ----- Services -----
@@ -70,6 +72,9 @@ builder.Services.AddScoped<IIssueService, IssueService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<INoteService, NoteService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddSingleton<IReportFormatter, CsvReportFormatter>();
+builder.Services.AddSingleton<IReportFormatter, PdfReportFormatter>();
 
 // CORS
 builder.Services.AddCors(options =>
