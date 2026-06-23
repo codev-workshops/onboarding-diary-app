@@ -28,7 +28,7 @@ public class LoginTests : IClassFixture<CustomWebApplicationFactory>
         });
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
+        var result = await response.Content.ReadAsAsync<AuthResponse>();
         result!.Token.Should().NotBeNullOrEmpty();
         result.User.Email.Should().Be(email);
     }

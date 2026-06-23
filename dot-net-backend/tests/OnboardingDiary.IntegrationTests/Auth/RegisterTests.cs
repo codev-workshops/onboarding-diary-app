@@ -27,7 +27,7 @@ public class RegisterTests : IClassFixture<CustomWebApplicationFactory>
         });
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
+        var result = await response.Content.ReadAsAsync<AuthResponse>();
         result!.Token.Should().NotBeNullOrEmpty();
         result.User.Email.Should().Contain("@test.com");
         result.User.FullName.Should().Be("Test User");

@@ -25,7 +25,7 @@ public class MeTests : IClassFixture<CustomWebApplicationFactory>
         var response = await _client.GetAsync("/api/auth/me");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var user = await response.Content.ReadFromJsonAsync<UserDto>();
+        var user = await response.Content.ReadAsAsync<UserDto>();
         user!.Email.Should().Be(email);
     }
 

@@ -16,14 +16,14 @@ public static class AuthHelper
             department = "Engineering"
         });
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<AuthResponse>())!;
+        return (await response.Content.ReadAsAsync<AuthResponse>())!;
     }
 
     public static async Task<AuthResponse> LoginAsync(HttpClient client, string email, string password = "P@ssw0rd!")
     {
         var response = await client.PostAsJsonAsync("/api/auth/login", new { email, password });
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<AuthResponse>())!;
+        return (await response.Content.ReadAsAsync<AuthResponse>())!;
     }
 
     public static void SetToken(HttpClient client, string token)
