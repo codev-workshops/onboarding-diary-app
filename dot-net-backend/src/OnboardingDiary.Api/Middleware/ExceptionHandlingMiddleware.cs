@@ -33,9 +33,10 @@ public class ExceptionHandlingMiddleware
         var (statusCode, title) = exception switch
         {
             NotFoundException => (HttpStatusCode.NotFound, "Not Found"),
+            UnauthorizedException => (HttpStatusCode.Unauthorized, "Unauthorized"),
             ForbiddenException => (HttpStatusCode.Forbidden, "Forbidden"),
             ConflictException => (HttpStatusCode.Conflict, "Conflict"),
-            ValidationException ve => (HttpStatusCode.BadRequest, "Validation Error"),
+            ValidationException => (HttpStatusCode.BadRequest, "Validation Error"),
             _ => (HttpStatusCode.InternalServerError, "Internal Server Error")
         };
 
@@ -61,6 +62,11 @@ public class NotFoundException : Exception
 public class ForbiddenException : Exception
 {
     public ForbiddenException() : base("You do not have permission to access this resource.") { }
+}
+
+public class UnauthorizedException : Exception
+{
+    public UnauthorizedException(string message) : base(message) { }
 }
 
 public class ConflictException : Exception
