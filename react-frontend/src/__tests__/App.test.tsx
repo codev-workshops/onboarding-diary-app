@@ -1,17 +1,21 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import App from '../App'
 
+vi.mock('../api/auth', () => ({
+  authApi: {
+    getMe: vi.fn().mockRejectedValue(new Error('no token')),
+  },
+}))
+
 describe('App', () => {
-  it('renders the application title', () => {
+  it('renders without crashing', () => {
     render(<App />)
-    expect(screen.getByText('Onboarding Diary')).toBeInTheDocument()
+    expect(document.body).toBeDefined()
   })
 
-  it('renders the welcome message', () => {
+  it('shows login page when not authenticated', async () => {
     render(<App />)
-    expect(
-      screen.getByText('Welcome to the Onboarding Diary application.')
-    ).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /sign in/i })).toBeInTheDocument()
   })
 })
