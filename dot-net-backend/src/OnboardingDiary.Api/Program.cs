@@ -75,6 +75,7 @@ builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddSingleton<IReportFormatter, CsvReportFormatter>();
 builder.Services.AddSingleton<IReportFormatter, PdfReportFormatter>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 // CORS
 builder.Services.AddCors(options =>
