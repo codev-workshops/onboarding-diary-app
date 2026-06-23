@@ -3,13 +3,18 @@ import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SnackbarProvider } from 'notistack'
-import Container from '@mui/material/Container'
-import Typography from '@mui/material/Typography'
 import theme from './theme'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import Layout from './components/Layout'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Dashboard from './pages/Dashboard'
+import Tasks from './pages/Tasks'
+import Issues from './pages/Issues'
+import FeedbackPage from './pages/Feedback'
+import Notes from './pages/Notes'
+import SearchPage from './pages/SearchPage'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -19,19 +24,6 @@ const queryClient = new QueryClient({
     },
   },
 })
-
-function Dashboard() {
-  return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
-      <Typography variant="h3" component="h1" gutterBottom>
-        Onboarding Diary
-      </Typography>
-      <Typography variant="body1" color="text.secondary">
-        Welcome to the Onboarding Diary application.
-      </Typography>
-    </Container>
-  )
-}
 
 function App() {
   return (
@@ -44,14 +36,14 @@ function App() {
               <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
+                <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/tasks" element={<Tasks />} />
+                  <Route path="/issues" element={<Issues />} />
+                  <Route path="/feedback" element={<FeedbackPage />} />
+                  <Route path="/notes" element={<Notes />} />
+                  <Route path="/search" element={<SearchPage />} />
+                </Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </AuthProvider>
