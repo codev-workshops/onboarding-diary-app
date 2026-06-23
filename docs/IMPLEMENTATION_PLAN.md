@@ -2,7 +2,7 @@
 
 > **Stack Decision**: React (Vite + TypeScript + MUI) front-end, ASP.NET Core (.NET 8) Web API back-end, SQL Server database.
 >
-> This plan replaces the previously scaffolded Python/FastAPI + PostgreSQL stack. The existing `DEVELOPMENT_SPEC.md` remains the canonical source for **user stories**, **API contracts**, **validation rules**, and **UI flows**. This document covers the implementation-specific details: .NET project structure, SQL Server schema, architecture patterns, NuGet/npm dependencies, and phased build plan.
+> The existing Python/FastAPI + PostgreSQL scaffold (in `backend/` and `frontend/`) is **preserved as-is**. All new implementation goes into separate folders: **`dot-net-backend/`** for the ASP.NET Core API and **`react-frontend/`** for the new React + MUI SPA. The existing `DEVELOPMENT_SPEC.md` remains the canonical source for **user stories**, **API contracts**, **validation rules**, and **UI flows**. This document covers the implementation-specific details: .NET project structure, SQL Server schema, architecture patterns, NuGet/npm dependencies, and phased build plan.
 
 ---
 
@@ -18,6 +18,26 @@
 8. [Development Workflow & CI](#8-development-workflow--ci)
 9. [Phased Build Plan](#9-phased-build-plan)
 10. [Extra Features (Step 3)](#10-extra-features-step-3)
+
+---
+
+## Repository Layout
+
+The new implementation lives alongside the existing scaffold. No existing files are modified or removed.
+
+```
+onboarding-diary-app/
+├── backend/                  # EXISTING — Python/FastAPI (untouched)
+├── frontend/                 # EXISTING — Original React scaffold (untouched)
+├── db/                       # EXISTING — PostgreSQL init scripts (untouched)
+├── docker-compose.yml        # EXISTING — PostgreSQL + Python + React (untouched)
+├── docs/
+│   ├── DEVELOPMENT_SPEC.md   # EXISTING — Functional spec (user stories, API, etc.)
+│   └── IMPLEMENTATION_PLAN.md # NEW — This document
+├── dot-net-backend/          # NEW — ASP.NET Core (.NET 8) Web API
+├── react-frontend/           # NEW — React + Vite + TypeScript + MUI SPA
+└── docker-compose.new.yml    # NEW — SQL Server + .NET backend + React frontend
+```
 
 ---
 
@@ -59,7 +79,7 @@
 ### 2.1 Solution & Project Structure
 
 ```
-backend/
+dot-net-backend/
 ├── OnboardingDiary.sln
 ├── src/
 │   └── OnboardingDiary.Api/
@@ -168,6 +188,8 @@ backend/
         ├── Services/                            # Unit tests for service layer
         └── Controllers/                         # Integration tests (WebApplicationFactory)
 ```
+
+> **Note:** The existing `backend/` folder (Python/FastAPI) is left untouched. All .NET code lives exclusively in `dot-net-backend/`.
 
 ### 2.2 NuGet Dependencies
 
@@ -395,7 +417,7 @@ Role:     admin
 ### 4.1 Project Structure
 
 ```
-frontend/
+react-frontend/
 ├── package.json
 ├── vite.config.ts
 ├── tsconfig.json
@@ -484,6 +506,8 @@ frontend/
     │
     └── routes.tsx                      # Centralized route definitions
 ```
+
+> **Note:** The existing `frontend/` folder (original React scaffold) is left untouched. All new React/MUI code lives exclusively in `react-frontend/`.
 
 ### 4.2 npm Dependencies
 
@@ -616,13 +640,13 @@ public async Task<TaskDto> GetTask(Guid taskId, Guid currentUserId, string role)
 
 ### 6.3 File Storage
 
-Generated reports stored in a `reports/` directory on disk (mapped via Docker volume). Each file named `{reportId}.{format}`. Download endpoint streams the file with `Content-Disposition: attachment`.
+Generated reports stored in a `dot-net-backend/reports/` directory on disk (mapped via Docker volume). Each file named `{reportId}.{format}`. Download endpoint streams the file with `Content-Disposition: attachment`.
 
 ---
 
 ## 7. Docker Compose Setup
 
-Replace the current `docker-compose.yml` (PostgreSQL + Python) with:
+A **new** `docker-compose.new.yml` is added at the repo root for the .NET + SQL Server stack. The existing `docker-compose.yml` (PostgreSQL + Python) is **preserved as-is**:
 
 ```yaml
 services:
@@ -644,7 +668,7 @@ services:
 
   backend:
     build:
-      context: ./backend
+      context: ./dot-net-backend
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
@@ -659,7 +683,7 @@ services:
 
   frontend:
     build:
-      context: ./frontend
+      context: ./react-frontend
       dockerfile: Dockerfile
     restart: unless-stopped
     ports:
@@ -671,7 +695,7 @@ volumes:
   mssql_data:
 ```
 
-**Backend Dockerfile:**
+**Backend Dockerfile** (`dot-net-backend/Dockerfile`):
 ```dockerfile
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
@@ -687,7 +711,7 @@ EXPOSE 8080
 ENTRYPOINT ["dotnet", "OnboardingDiary.Api.dll"]
 ```
 
-**Frontend Dockerfile** (unchanged from existing — Vite build → nginx):
+**Frontend Dockerfile** (`react-frontend/Dockerfile` — Vite build → nginx):
 ```dockerfile
 FROM node:20-alpine AS build
 WORKDIR /app
@@ -710,21 +734,21 @@ EXPOSE 80
 
 **Backend:**
 ```bash
-cd backend/src/OnboardingDiary.Api
+cd dot-net-backend/src/OnboardingDiary.Api
 dotnet watch run    # Hot-reload on port 5000
 ```
 
 **Frontend:**
 ```bash
-cd frontend
+cd react-frontend
 npm install
 npm run dev         # Vite dev server on port 3000
 ```
 
 **Database:**
 ```bash
-docker compose up db    # Just SQL Server in Docker
-dotnet ef database update --project backend/src/OnboardingDiary.Api  # Apply migrations
+docker compose -f docker-compose.new.yml up db    # Just SQL Server in Docker
+dotnet ef database update --project dot-net-backend/src/OnboardingDiary.Api  # Apply migrations
 ```
 
 ### 8.2 CI Pipeline (GitHub Actions)
@@ -753,11 +777,11 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - run: dotnet restore
-        working-directory: backend
+        working-directory: dot-net-backend
       - run: dotnet build --no-restore
-        working-directory: backend
+        working-directory: dot-net-backend
       - run: dotnet test --no-build
-        working-directory: backend
+        working-directory: dot-net-backend
 
   frontend:
     runs-on: ubuntu-latest
@@ -767,17 +791,17 @@ jobs:
         with:
           node-version: '20'
       - run: npm ci
-        working-directory: frontend
+        working-directory: react-frontend
       - run: npm run lint
-        working-directory: frontend
+        working-directory: react-frontend
       - run: npm run build
-        working-directory: frontend
+        working-directory: react-frontend
 ```
 
 ### 8.3 Code Quality
 
 - **Backend**: `dotnet format` for formatting, analyzers via `<AnalysisMode>AllEnabledByDefault</AnalysisMode>`.
-- **Frontend**: ESLint (already configured in repo), Prettier, TypeScript strict mode.
+- **Frontend**: ESLint (configured in `react-frontend/`), Prettier, TypeScript strict mode.
 
 ---
 
@@ -786,16 +810,15 @@ jobs:
 Each phase is a self-contained PR-sized increment. Later phases depend on earlier ones.
 
 ### Phase 1: Project Scaffolding & Infrastructure
-**Goal:** Replace Python/FastAPI scaffold with .NET 8 project; set up SQL Server; verify end-to-end "hello world."
+**Goal:** Create new `dot-net-backend/` and `react-frontend/` folders with .NET 8 project and React+MUI app; set up SQL Server; verify end-to-end "hello world." Existing `backend/`, `frontend/`, and `db/` folders are **not modified**.
 
-- [ ] Remove existing `backend/` Python code, `db/init/` PostgreSQL scripts.
-- [ ] Create `backend/OnboardingDiary.sln` with `OnboardingDiary.Api` project.
+- [ ] Create `dot-net-backend/OnboardingDiary.sln` with `OnboardingDiary.Api` project.
 - [ ] Add NuGet packages, `Program.cs` with DI, Swagger, CORS, exception middleware.
 - [ ] Create `AppDbContext` with User entity + initial migration.
-- [ ] Update `docker-compose.yml` for SQL Server + .NET.
-- [ ] Update `.gitignore` for .NET artifacts (`bin/`, `obj/`, etc.).
-- [ ] Update frontend `package.json` with MUI + React Query + react-hook-form + zod.
-- [ ] Verify: `docker compose up` starts all three services; Swagger UI accessible; frontend loads.
+- [ ] Add `docker-compose.new.yml` for SQL Server + .NET backend + React frontend.
+- [ ] Update `.gitignore` to add .NET artifacts (`bin/`, `obj/`, etc.).
+- [ ] Scaffold `react-frontend/` with Vite + TypeScript + MUI + React Query + react-hook-form + zod.
+- [ ] Verify: `docker compose -f docker-compose.new.yml up` starts all three services; Swagger UI accessible; frontend loads.
 
 ### Phase 2: Authentication & User Profile
 **Goal:** Register, login (JWT), profile view/edit, seed admin.
