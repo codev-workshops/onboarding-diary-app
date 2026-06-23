@@ -24,5 +24,15 @@ frontend/dist/
 .DS_Store
 Thumbs.db
 
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.DotSettings
+*.DotSettings.user
+publish/
+
 # Docker
 postgres_data/
+mssql_data/
